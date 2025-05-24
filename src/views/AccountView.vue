@@ -498,21 +498,107 @@ export default {
       }
     },
     
-    // Simulate profile update API call
-    simulateProfileUpdate() {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          console.log('Profile updated:', this.userProfile)
-          resolve()
-        }, 1000)
-      })
+    // Save profile changes to real database
+    async simulateProfileUpdate() {
+      try {
+        // Get user data from localStorage
+        const userData = localStorage.getItem('ecogear_user')
+        if (!userData) {
+          throw new Error('User not authenticated')
+        }
+        
+        const user = JSON.parse(userData)
+        
+        // Prepare data for backend
+        const updateData = {
+          user_id: user.user_id,
+          firstName: this.userProfile.firstName,
+          lastName: this.userProfile.lastName,
+          email: this.userProfile.email,
+          phone: this.userProfile.phone,
+          dateOfBirth: this.userProfile.dateOfBirth,
+          gender: this.userProfile.gender,
+          address: this.userProfile.address,
+          city: this.userProfile.city,
+          state: this.userProfile.state,
+          postalCode: this.userProfile.postalCode,
+          preferences: this.userProfile.preferences
+        }
+        
+        const response = await fetch('http://localhost:8000/api/user/update.php', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updateData)
+        })
+        
+        const result = await response.json()
+        
+        if (result.success) {
+          console.log('Profile updated successfully')
+          return Promise.resolve()
+        } else {
+          throw new Error(result.message)
+        }
+      } catch (error) {
+        console.error('Profile update error:', error)
+        throw new Error('Failed to update profile')
+      }
     },
     
-    // Load user profile (simulate API call)
-    loadUserProfile() {
-      // This would normally fetch from API
-      // For now, we use the existing data
-      console.log('Loading user profile...')
+    // Load user profile from real database
+    async loadUserProfile() {
+      try {
+        // Get user data from localStorage
+        const userData = localStorage.getItem('ecogear_user')
+        if (!userData) {
+          this.$router.push('/login')
+          return
+        }
+        
+        const user = JSON.parse(userData)
+        console.log('Loading profile for user:', user.user_id)
+        
+        // Fetch real profile data from backend
+        const response = await fetch(`http://localhost:8000/api/user/profile.php?user_id=${user.user_id}`)
+        const result = await response.json()
+        
+        if (result.success) {
+          const profileData = result.data.user
+          
+          // Update userProfile with real data
+          this.userProfile = {
+            firstName: profileData.first_name || '',
+            lastName: profileData.last_name || '',
+            email: profileData.email || '',
+            phone: profileData.phone || '',
+            dateOfBirth: profileData.date_of_birth || '',
+            gender: profileData.gender || '',
+            address: profileData.address || '',
+            city: profileData.city || '',
+            state: profileData.state || '',
+            postalCode: profileData.postal_code || '',
+            profilePicture: profileData.profile_picture || null,
+            preferences: {
+              emailNotifications: profileData.email_notifications || false,
+              smsNotifications: profileData.sms_notifications || false,
+              newsletter: profileData.newsletter || false,
+              profileVisible: profileData.profile_visible || false,
+              shareActivity: profileData.share_activity || false,
+              dataSaving: profileData.data_saving || false
+            }
+          }
+          
+          console.log('Profile loaded successfully:', this.userProfile)
+        } else {
+          console.error('Failed to load profile:', result.message)
+          alert('Failed to load profile data')
+        }
+      } catch (error) {
+        console.error('Profile loading error:', error)
+        alert('Error loading profile data')
+      }
     },
     
     // Change profile picture
