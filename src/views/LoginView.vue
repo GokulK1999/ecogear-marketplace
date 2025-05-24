@@ -173,8 +173,8 @@
               </h6>
             </div>
             <div class="card-body">
-              <p class="mb-2"><strong>Email:</strong> demo@ecogear.com</p>
-              <p class="mb-2"><strong>Password:</strong> EcoDemo123</p>
+              <p class="mb-2"><strong>Email:</strong> gokul@ecogear.com</p>
+              <p class="mb-2"><strong>Password:</strong> password</p>
               <small class="text-muted">Use these credentials to test the login functionality</small>
             </div>
           </div>
@@ -207,7 +207,7 @@ export default {
       
       // Demo credentials
       demoCredentials: {
-        email: 'demo@ecogear.com',
+        email: 'gokul@ecogear.com',
         password: 'EcoDemo123'
       }
     }
@@ -228,38 +228,40 @@ export default {
       this.showPassword = !this.showPassword
     },
     
-    // Field validation
+    // Field validation - Vue 3 reactive approach
     validateField(fieldName) {
-      // Clear previous error
-      this.$set(this.errors, fieldName, '')
-      
       const value = this.loginData[fieldName]
       
       switch (fieldName) {
         case 'email':
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
           if (!value) {
-            this.$set(this.errors, fieldName, 'Email is required')
+            this.errors = { ...this.errors, [fieldName]: 'Email is required' }
           } else if (!emailRegex.test(value)) {
-            this.$set(this.errors, fieldName, 'Please enter a valid email address')
+            this.errors = { ...this.errors, [fieldName]: 'Please enter a valid email address' }
+          } else {
+            // Remove error
+            const newErrors = { ...this.errors }
+            delete newErrors[fieldName]
+            this.errors = newErrors
           }
           break
           
         case 'password':
           if (!value) {
-            this.$set(this.errors, fieldName, 'Password is required')
+            this.errors = { ...this.errors, [fieldName]: 'Password is required' }
           } else if (value.length < 6) {
-            this.$set(this.errors, fieldName, 'Password must be at least 6 characters')
+            this.errors = { ...this.errors, [fieldName]: 'Password must be at least 6 characters' }
+          } else {
+            // Remove error
+            const newErrors = { ...this.errors }
+            delete newErrors[fieldName]
+            this.errors = newErrors
           }
           break
       }
-      
-      // Remove error if field is now valid
-      if (!this.errors[fieldName]) {
-        this.$delete(this.errors, fieldName)
-      }
     },
-    
+
     // Validate entire form
     validateForm() {
       this.errors = {}
@@ -302,31 +304,50 @@ export default {
       }
     },
     
-    // Simulate login API call
-    simulateLogin() {
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          // Check demo credentials
-          if (this.loginData.email === this.demoCredentials.email && 
-              this.loginData.password === this.demoCredentials.password) {
-            // Successful login
-            localStorage.setItem('ecogear_user', JSON.stringify({
-              email: this.loginData.email,
-              name: 'Demo User',
-              loginTime: new Date().toISOString()
-            }))
-            resolve()
-          } else {
-            // Invalid credentials
-            reject(new Error('Invalid email or password. Please try again.'))
-          }
-        }, 1500)
-      })
+    // Real backend login API call
+    async simulateLogin() {
+      try {
+        const response = await fetch('http://localhost:8000/api/auth/login.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: this.loginData.email,
+            password: this.loginData.password
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Store user data
+          const userData = {
+            email: result.data.user.email,
+            name: result.data.user.first_name + ' ' + result.data.user.last_name,
+            loginTime: new Date().toISOString(),
+            token: result.data.token,
+            user_id: result.data.user.id
+          };
+          
+          localStorage.setItem('ecogear_user', JSON.stringify(userData));
+          
+          // Trigger navbar update
+          window.dispatchEvent(new Event('userLoggedIn'));
+          
+          return Promise.resolve();
+        } else {
+          throw new Error(result.message);
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        throw new Error(error.message || 'Login failed. Please check your connection.');
+      }
     },
     
     // Forgot password
     forgotPassword() {
-      alert('Forgot password functionality would be implemented here. For demo, use: demo@ecogear.com / EcoDemo123')
+      alert('Forgot password functionality would be implemented here. For demo, use: demo@ecogear.com / password')
     }
   },
   
