@@ -52,7 +52,7 @@
           <router-link class="nav-link position-relative me-3" to="/cart">
             <i class="bi bi-cart3 fs-5"></i>
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" v-if="cartItemCount > 0">
-              {{ cartItemCount }}
+                {{ cartItemCount }}
             </span>
           </router-link>
 
@@ -106,14 +106,24 @@
 </template>
 
 <script>
+import { useCartStore } from '@/stores/cartStore'
+
 export default {
   name: 'NavBar',
+  setup() {
+    const cartStore = useCartStore()
+    return { cartStore }
+  },
   data() {
     return {
-      // Mock data - will be replaced with actual state management later
+      // Mock auth data - will be replaced with actual auth later
       isLoggedIn: false,
-      userName: 'John Doe',
-      cartItemCount: 3
+      userName: 'John Doe'
+    }
+  },
+  computed: {
+    cartItemCount() {
+      return this.cartStore.itemCount
     }
   },
   methods: {

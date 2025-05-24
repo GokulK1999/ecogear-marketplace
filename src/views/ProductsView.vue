@@ -265,10 +265,10 @@
                       <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="price-section">
                           <span class="current-price h5 text-success fw-bold mb-0">
-                            ${{ formatPrice(product.price) }}
+                            RM{{ formatPrice(product.price) }}
                           </span>
                           <small class="original-price text-muted text-decoration-line-through ms-2" v-if="product.originalPrice > product.price">
-                            ${{ formatPrice(product.originalPrice) }}
+                            RM{{ formatPrice(product.originalPrice) }}
                           </small>
                         </div>
                         <small class="text-muted">{{ product.weight }}</small>
@@ -358,10 +358,10 @@ export default {
       // Price ranges for filtering
       priceRanges: [
         { id: 'all', label: 'All Prices' },
-        { id: 'under-50', label: 'Under $50' },
-        { id: '50-100', label: '$50 - $100' },
-        { id: '100-200', label: '$100 - $200' },
-        { id: 'over-200', label: 'Over $200' }
+        { id: 'under-50', label: 'Under RM50' },
+        { id: '50-100', label: 'RM50 - RM100' },
+        { id: '100-200', label: 'RM100 - RM200' },
+        { id: 'over-200', label: 'Over RM200' }
       ]
     }
   },
