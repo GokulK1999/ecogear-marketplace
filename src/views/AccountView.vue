@@ -30,64 +30,105 @@
           <div class="profile-sidebar">
             
             <!-- Profile Card -->
-            <div class="card shadow-sm mb-4">
+            <div class="card shadow-sm mb-4" :class="{ 'loading': isLoading }">
               <div class="card-body text-center p-4">
-                <!-- Profile Picture -->
-                <div class="profile-picture mb-3">
-                  <div class="avatar-container position-relative">
-                    <img 
-                      :src="profilePictureUrl" 
-                      :alt="userProfile.firstName + ' ' + userProfile.lastName"
-                      class="avatar rounded-circle"
-                      @error="$event.target.src = '/src/assets/images/default-avatar.jpg'"
-                    >
-                    <button 
-                      class="btn btn-sm btn-eco-primary avatar-edit-btn position-absolute"
-                      @click="changeProfilePicture"
-                      v-if="isEditMode"
-                      :disabled="isUploadingImage"
-                    >
-                      <span v-if="isUploadingImage">
-                        <span class="spinner-border spinner-border-sm" role="status"></span>
-                      </span>
-                      <i v-else class="bi bi-camera"></i>
-                    </button>
+                <!-- Loading Skeleton -->
+                <div v-if="isLoading" class="loading-skeleton">
+                  <!-- Profile Picture Skeleton -->
+                  <div class="profile-picture mb-3">
+                    <div class="avatar-container position-relative">
+                      <div class="avatar rounded-circle skeleton-avatar"></div>
+                    </div>
+                  </div>
+                  
+                  <!-- User Info Skeleton -->
+                  <div class="skeleton-text skeleton-name mb-2"></div>
+                  <div class="skeleton-text skeleton-email mb-2"></div>
+                  
+                  <!-- Badges Skeleton -->
+                  <div class="user-badges mb-3">
+                    <span class="skeleton-badge me-1"></span>
+                    <span class="skeleton-badge"></span>
+                  </div>
+                  
+                  <!-- Stats Skeleton -->
+                  <div class="account-stats mt-3">
+                    <div class="row g-3 text-center">
+                      <div class="col-4">
+                        <div class="skeleton-text skeleton-stat"></div>
+                        <div class="skeleton-text skeleton-label"></div>
+                      </div>
+                      <div class="col-4">
+                        <div class="skeleton-text skeleton-stat"></div>
+                        <div class="skeleton-text skeleton-label"></div>
+                      </div>
+                      <div class="col-4">
+                        <div class="skeleton-text skeleton-stat"></div>
+                        <div class="skeleton-text skeleton-label"></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                
-                <!-- User Info -->
-                <h4 class="fw-bold text-dark mb-1">
-                  {{ userProfile.firstName }} {{ userProfile.lastName }}
-                </h4>
-                <p class="text-muted mb-2">{{ userProfile.email }}</p>
-                <div class="user-badges">
-                  <span class="badge bg-success me-1">
-                    <i class="bi bi-shield-check me-1"></i>Verified
-                  </span>
-                  <span class="badge bg-primary">
-                    <i class="bi bi-leaf me-1"></i>Eco Warrior
-                  </span>
-                </div>
-                
-                <!-- Account Stats -->
-                <div class="account-stats mt-3">
-                  <div class="row g-3 text-center">
-                    <div class="col-4">
-                      <div class="stat-item">
-                        <div class="stat-number fw-bold text-success">{{ userStats.totalOrders }}</div>
-                        <div class="stat-label small text-muted">Orders</div>
-                      </div>
+
+                <!-- Actual Content -->
+                <div v-else>
+                  <!-- Profile Picture -->
+                  <div class="profile-picture mb-3">
+                    <div class="avatar-container position-relative">
+                      <img 
+                        :src="profilePictureUrl" 
+                        :alt="userProfile.firstName + ' ' + userProfile.lastName"
+                        class="avatar rounded-circle"
+                        @error="$event.target.src = '/src/assets/images/default-avatar.jpg'"
+                      >
+                      <button 
+                        class="btn btn-sm btn-eco-primary avatar-edit-btn position-absolute"
+                        @click="changeProfilePicture"
+                        v-if="isEditMode"
+                        :disabled="isUploadingImage"
+                      >
+                        <span v-if="isUploadingImage">
+                          <span class="spinner-border spinner-border-sm" role="status"></span>
+                        </span>
+                        <i v-else class="bi bi-camera"></i>
+                      </button>
                     </div>
-                    <div class="col-4">
-                      <div class="stat-item">
-                        <div class="stat-number fw-bold text-info">{{ userStats.totalSpent }}</div>
-                        <div class="stat-label small text-muted">Spent</div>
+                  </div>
+                  
+                  <!-- User Info -->
+                  <h4 class="fw-bold text-dark mb-1">
+                    {{ displayName }}
+                  </h4>
+                  <p class="text-muted mb-2">{{ userProfile.email || 'Loading...' }}</p>
+                  <div class="user-badges">
+                    <span class="badge bg-success me-1">
+                      <i class="bi bi-shield-check me-1"></i>Verified
+                    </span>
+                    <span class="badge bg-primary">
+                      <i class="bi bi-leaf me-1"></i>Eco Warrior
+                    </span>
+                  </div>
+                  
+                  <!-- Account Stats -->
+                  <div class="account-stats mt-3">
+                    <div class="row g-3 text-center">
+                      <div class="col-4">
+                        <div class="stat-item">
+                          <div class="stat-number fw-bold text-success">{{ userStats.totalOrders }}</div>
+                          <div class="stat-label small text-muted">Orders</div>
+                        </div>
                       </div>
-                    </div>
-                    <div class="col-4">
-                      <div class="stat-item">
-                        <div class="stat-number fw-bold text-warning">{{ userStats.ecoPoints }}</div>
-                        <div class="stat-label small text-muted">Eco Points</div>
+                      <div class="col-4">
+                        <div class="stat-item">
+                          <div class="stat-number fw-bold text-info">{{ userStats.totalSpent }}</div>
+                          <div class="stat-label small text-muted">Spent</div>
+                        </div>
+                      </div>
+                      <div class="col-4">
+                        <div class="stat-item">
+                          <div class="stat-number fw-bold text-warning">{{ userStats.ecoPoints }}</div>
+                          <div class="stat-label small text-muted">Eco Points</div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -436,25 +477,26 @@ export default {
     return {
       isEditMode: false,
       isUploadingImage: false,
+      isLoading: true, // ADD LOADING STATE
       
-      // User profile data - demonstrates data management
+      // User profile data - START WITH EMPTY DATA
       userProfile: {
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'demo@ecogear.com',
-        phone: '+60 12-345 6789',
-        dateOfBirth: '1990-01-15',
-        gender: 'male',
-        address: '123 Jalan Sustainable',
-        city: 'Kuala Lumpur',
-        state: 'Kuala Lumpur',
-        postalCode: '50000',
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        dateOfBirth: '',
+        gender: '',
+        address: '',
+        city: '',
+        state: '',
+        postalCode: '',
         profilePicture: null,
         preferences: {
-          emailNotifications: true,
+          emailNotifications: false,
           smsNotifications: false,
-          newsletter: true,
-          profileVisible: true,
+          newsletter: false,
+          profileVisible: false,
           shareActivity: false,
           dataSaving: false
         }
@@ -462,9 +504,9 @@ export default {
       
       // User statistics
       userStats: {
-        totalOrders: 12,
-        totalSpent: 'RM2,450',
-        ecoPoints: 1250
+        totalOrders: 0,
+        totalSpent: 'RM0',
+        ecoPoints: 0
       },
       
       // Malaysian states
@@ -489,6 +531,12 @@ export default {
       }
       // Default avatar
       return '/src/assets/images/default-avatar.jpg'
+    },
+    
+    // Display name with fallback
+    displayName() {
+      if (this.isLoading) return 'Loading...'
+      return `${this.userProfile.firstName} ${this.userProfile.lastName}`.trim() || 'User'
     }
   },
   
@@ -505,15 +553,9 @@ export default {
     // Save profile changes
     async saveProfile() {
       try {
-        // Simulate API call
         await this.simulateProfileUpdate()
-        
-        // Show success message
         alert('Profile updated successfully!')
-        
-        // Exit edit mode
         this.isEditMode = false
-        
       } catch (error) {
         alert('Failed to update profile. Please try again.')
         console.error('Profile update error:', error)
@@ -523,7 +565,6 @@ export default {
     // Save profile changes to real database
     async simulateProfileUpdate() {
       try {
-        // Get user data from localStorage
         const userData = localStorage.getItem('ecogear_user')
         if (!userData) {
           throw new Error('User not authenticated')
@@ -531,7 +572,6 @@ export default {
         
         const user = JSON.parse(userData)
         
-        // Prepare data for backend
         const updateData = {
           user_id: user.user_id,
           firstName: this.userProfile.firstName,
@@ -572,7 +612,11 @@ export default {
     // Load user profile from real database
     async loadUserProfile() {
       try {
-        // Get user data from localStorage
+        // Only set loading if not already loaded
+        if (!this.userProfile.firstName) {
+          this.isLoading = true
+        }
+        
         const userData = localStorage.getItem('ecogear_user')
         if (!userData) {
           this.$router.push('/login')
@@ -582,7 +626,6 @@ export default {
         const user = JSON.parse(userData)
         console.log('Loading profile for user:', user.user_id)
         
-        // Fetch real profile data from backend
         const response = await fetch(`http://localhost:8000/api/user/profile.php?user_id=${user.user_id}`)
         const result = await response.json()
         
@@ -620,19 +663,19 @@ export default {
       } catch (error) {
         console.error('Profile loading error:', error)
         alert('Error loading profile data')
+      } finally {
+        this.isLoading = false
       }
     },
     
-    // Change profile picture - NEW FUNCTIONALITY
+    // Change profile picture
     async changeProfilePicture() {
       try {
-        // Create file input element
         const input = document.createElement('input')
         input.type = 'file'
         input.accept = 'image/*'
         input.style.display = 'none'
         
-        // Add event listener
         input.addEventListener('change', async (event) => {
           const file = event.target.files[0]
           if (file) {
@@ -640,7 +683,6 @@ export default {
           }
         })
         
-        // Trigger file picker
         document.body.appendChild(input)
         input.click()
         document.body.removeChild(input)
@@ -651,10 +693,9 @@ export default {
       }
     },
     
-    // Upload profile image - NEW FUNCTIONALITY
+    // Upload profile image
     async uploadProfileImage(file) {
       try {
-        // Validate file
         const maxSize = 5 * 1024 * 1024 // 5MB
         if (file.size > maxSize) {
           alert('File size too large. Maximum size is 5MB.')
@@ -669,7 +710,6 @@ export default {
         
         this.isUploadingImage = true
         
-        // Get user data
         const userData = localStorage.getItem('ecogear_user')
         if (!userData) {
           throw new Error('User not authenticated')
@@ -677,12 +717,10 @@ export default {
         
         const user = JSON.parse(userData)
         
-        // Create FormData
         const formData = new FormData()
         formData.append('profile_image', file)
         formData.append('user_id', user.user_id)
         
-        // Upload image
         const response = await fetch('http://localhost:8000/api/user/upload-image.php', {
           method: 'POST',
           body: formData
@@ -691,7 +729,6 @@ export default {
         const result = await response.json()
         
         if (result.success) {
-          // Update profile picture in UI
           this.userProfile.profilePicture = result.data.image_path
           alert('Profile picture updated successfully!')
         } else {
@@ -706,29 +743,24 @@ export default {
       }
     },
     
-    // Change password
     changePassword() {
       alert('Password change functionality would be implemented here')
     },
     
-    // Manage 2FA
     manage2FA() {
       alert('Two-factor authentication management would be implemented here')
     },
     
-    // Download user data
     downloadData() {
       alert('Data download functionality would be implemented here')
     },
     
-    // Delete account
     deleteAccount() {
       if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
         alert('Account deletion functionality would be implemented here')
       }
     },
     
-    // Get gender display text
     getGenderDisplay(gender) {
       const genderMap = {
         'male': 'Male',
@@ -740,7 +772,6 @@ export default {
     }
   },
   
-  // Load user data when component mounts
   mounted() {
     this.loadUserProfile()
   }
@@ -838,6 +869,75 @@ export default {
 .btn-eco-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(45, 80, 22, 0.3);
+}
+
+/* Loading Skeleton Styles */
+.loading-skeleton {
+  animation: none; /* Disable card animation during loading */
+}
+
+.skeleton-avatar {
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border: 4px solid var(--eco-light);
+}
+
+.skeleton-text {
+  height: 16px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+  margin: 0 auto;
+}
+
+.skeleton-name {
+  height: 24px;
+  width: 180px;
+}
+
+.skeleton-email {
+  height: 16px;
+  width: 220px;
+}
+
+.skeleton-badge {
+  display: inline-block;
+  width: 70px;
+  height: 24px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 12px;
+}
+
+.skeleton-stat {
+  height: 20px;
+  width: 40px;
+  margin: 0 auto 8px;
+}
+
+.skeleton-label {
+  height: 14px;
+  width: 50px;
+  margin: 0 auto;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Disable card animation during loading */
+.card.loading {
+  animation: none !important;
 }
 
 /* Responsive design */

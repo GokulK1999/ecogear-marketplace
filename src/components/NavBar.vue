@@ -116,9 +116,8 @@ export default {
   },
   data() {
     return {
-      // Mock auth data - will be replaced with actual auth later
       isLoggedIn: false,
-      userName: 'John Doe'
+      userName: ''
     }
   },
   computed: {
@@ -127,11 +126,57 @@ export default {
     }
   },
   methods: {
+    // Check if user is logged in
+    checkAuthStatus() {
+      const userData = localStorage.getItem('ecogear_user')
+      if (userData) {
+        try {
+          const user = JSON.parse(userData)
+          this.isLoggedIn = true
+          this.userName = user.name || 'User'
+        } catch (error) {
+          console.error('Error parsing user data:', error)
+          this.logout()
+        }
+      } else {
+        this.isLoggedIn = false
+        this.userName = ''
+      }
+    },
+
+    // Handle logout
     logout() {
-      // Handle logout logic
+      // Clear localStorage
+      localStorage.removeItem('ecogear_user')
+      
+      // Update navbar state
       this.isLoggedIn = false
-      this.$router.push('/login')
+      this.userName = ''
+      
+      // Redirect to home page
+      this.$router.push('/')
+      
+      // Show logout message
+      alert('You have been logged out successfully!')
+      
+      // Trigger custom event for other components
+      window.dispatchEvent(new Event('userLoggedOut'))
     }
+  },
+  
+  mounted() {
+    // Check auth status when component mounts
+    this.checkAuthStatus()
+    
+    // Listen for login events
+    window.addEventListener('userLoggedIn', this.checkAuthStatus)
+    window.addEventListener('userLoggedOut', this.checkAuthStatus)
+  },
+  
+  beforeUnmount() {
+    // Clean up event listeners
+    window.removeEventListener('userLoggedIn', this.checkAuthStatus)
+    window.removeEventListener('userLoggedOut', this.checkAuthStatus)
   }
 }
 </script>
