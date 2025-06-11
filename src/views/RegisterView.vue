@@ -516,10 +516,12 @@ export default {
       this.showConfirmPassword = !this.showConfirmPassword
     },
     
-    // Field validation
+    // Field validation - Vue 3 compatible
     validateField(fieldName) {
-      // Clear previous error
-      this.$set(this.errors, fieldName, '')
+      // Clear previous error - Vue 3 way
+      const newErrors = { ...this.errors }
+      delete newErrors[fieldName]
+      this.errors = newErrors
       
       const value = this.formData[fieldName]
       
@@ -527,25 +529,25 @@ export default {
         case 'firstName':
         case 'lastName':
           if (!value || value.trim().length < 2) {
-            this.$set(this.errors, fieldName, 'Name must be at least 2 characters long')
+            this.errors = { ...this.errors, [fieldName]: 'Name must be at least 2 characters long' }
           }
           break
           
         case 'email':
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
           if (!value) {
-            this.$set(this.errors, fieldName, 'Email is required')
+            this.errors = { ...this.errors, [fieldName]: 'Email is required' }
           } else if (!emailRegex.test(value)) {
-            this.$set(this.errors, fieldName, 'Please enter a valid email address')
+            this.errors = { ...this.errors, [fieldName]: 'Please enter a valid email address' }
           }
           break
           
         case 'phone':
           const phoneRegex = /^(\+?6?01)[0-46-9]-*[0-9]{7,8}$/
           if (!value) {
-            this.$set(this.errors, fieldName, 'Phone number is required')
+            this.errors = { ...this.errors, [fieldName]: 'Phone number is required' }
           } else if (!phoneRegex.test(value.replace(/[\s-]/g, ''))) {
-            this.$set(this.errors, fieldName, 'Please enter a valid Malaysian phone number')
+            this.errors = { ...this.errors, [fieldName]: 'Please enter a valid Malaysian phone number' }
           }
           break
           
@@ -555,7 +557,7 @@ export default {
             const today = new Date()
             const age = today.getFullYear() - birthDate.getFullYear()
             if (age < 13) {
-              this.$set(this.errors, fieldName, 'You must be at least 13 years old')
+              this.errors = { ...this.errors, [fieldName]: 'You must be at least 13 years old' }
             }
           }
           break
@@ -563,32 +565,32 @@ export default {
         case 'address':
         case 'city':
           if (!value || value.trim().length < 3) {
-            this.$set(this.errors, fieldName, 'This field must be at least 3 characters long')
+            this.errors = { ...this.errors, [fieldName]: 'This field must be at least 3 characters long' }
           }
           break
           
         case 'state':
           if (!value) {
-            this.$set(this.errors, fieldName, 'Please select a state')
+            this.errors = { ...this.errors, [fieldName]: 'Please select a state' }
           }
           break
           
         case 'postalCode':
           const postalRegex = /^\d{5}$/
           if (!value) {
-            this.$set(this.errors, fieldName, 'Postal code is required')
+            this.errors = { ...this.errors, [fieldName]: 'Postal code is required' }
           } else if (!postalRegex.test(value)) {
-            this.$set(this.errors, fieldName, 'Please enter a valid 5-digit postal code')
+            this.errors = { ...this.errors, [fieldName]: 'Please enter a valid 5-digit postal code' }
           }
           break
           
         case 'password':
           if (!value) {
-            this.$set(this.errors, fieldName, 'Password is required')
+            this.errors = { ...this.errors, [fieldName]: 'Password is required' }
           } else if (value.length < 8) {
-            this.$set(this.errors, fieldName, 'Password must be at least 8 characters long')
+            this.errors = { ...this.errors, [fieldName]: 'Password must be at least 8 characters long' }
           } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value)) {
-            this.$set(this.errors, fieldName, 'Password must contain uppercase, lowercase, and number')
+            this.errors = { ...this.errors, [fieldName]: 'Password must contain uppercase, lowercase, and number' }
           }
           
           // Re-validate confirm password if it exists
@@ -599,22 +601,17 @@ export default {
           
         case 'confirmPassword':
           if (!value) {
-            this.$set(this.errors, fieldName, 'Please confirm your password')
+            this.errors = { ...this.errors, [fieldName]: 'Please confirm your password' }
           } else if (value !== this.formData.password) {
-            this.$set(this.errors, fieldName, 'Passwords do not match')
+            this.errors = { ...this.errors, [fieldName]: 'Passwords do not match' }
           }
           break
           
         case 'termsAccepted':
           if (!value) {
-            this.$set(this.errors, fieldName, 'You must accept the terms and conditions')
+            this.errors = { ...this.errors, [fieldName]: 'You must accept the terms and conditions' }
           }
           break
-      }
-      
-      // Remove error if field is now valid
-      if (!this.errors[fieldName]) {
-        this.$delete(this.errors, fieldName)
       }
     },
     
@@ -640,43 +637,78 @@ export default {
     async submitRegistration() {
       // Validate form
       if (!this.validateForm()) {
+        alert('Please fix the form errors before submitting.')
         return
       }
       
       this.isSubmitting = true
       
       try {
-        // Here we would normally send to backend API
-        // For now, we'll simulate the process
-        await this.simulateRegistration()
+        // Call real backend API
+        await this.callRegistrationAPI()
         
         // Show success message
-        alert('Registration successful! Welcome to EcoGear!')
+        alert('Registration successful! Welcome to EcoGear! You can now login with your credentials.')
         
         // Redirect to login page
         this.$router.push('/login')
         
       } catch (error) {
-        alert('Registration failed. Please try again.')
+        alert(`Registration failed: ${error.message}`)
         console.error('Registration error:', error)
       } finally {
         this.isSubmitting = false
       }
     },
     
-    // Simulate registration API call
-    simulateRegistration() {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          // Here we would send the registration data to backend
-          console.log('Registration data:', {
-            ...this.formData,
-            password: '[HIDDEN]',
-            confirmPassword: '[HIDDEN]'
+    // Real registration API call
+    async callRegistrationAPI() {
+      try {
+        console.log('Sending registration data:', this.formData)
+        
+        const response = await fetch('http://localhost:8000/api/auth/register.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            firstName: this.formData.firstName,
+            lastName: this.formData.lastName,
+            email: this.formData.email,
+            phone: this.formData.phone,
+            dateOfBirth: this.formData.dateOfBirth || null,
+            address: this.formData.address,
+            city: this.formData.city,
+            state: this.formData.state,
+            postalCode: this.formData.postalCode,
+            gender: this.formData.gender || '',
+            password: this.formData.password,
+            confirmPassword: this.formData.confirmPassword,
+            newsletter: this.formData.newsletter,
+            smsNotifications: this.formData.smsNotifications,
+            termsAccepted: this.formData.termsAccepted
           })
-          resolve()
-        }, 2000)
-      })
+        })
+
+        console.log('Response status:', response.status)
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const result = await response.json()
+        console.log('Registration result:', result)
+
+        if (result.success) {
+          return Promise.resolve()
+        } else {
+          throw new Error(result.message || 'Registration failed')
+        }
+        
+      } catch (error) {
+        console.error('Registration API error:', error)
+        throw new Error(error.message || 'Registration failed. Please check your connection.')
+      }
     }
   }
 }

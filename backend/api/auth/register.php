@@ -4,6 +4,10 @@
  * Handles new user account creation
  */
 
+// Turn off HTML error display for clean JSON responses
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
 require_once '../../config/cors.php';
 require_once '../../config/database.php';
 
@@ -19,6 +23,9 @@ try {
     if (!$input) {
         sendResponse(false, 'Invalid JSON data', null, 400);
     }
+    
+    // Log the received data for debugging
+    error_log("Registration attempt: " . json_encode($input));
     
     // Sanitize input
     $data = sanitizeInput($input);
@@ -84,18 +91,21 @@ try {
     
     $insert_stmt = $conn->prepare($insert_query);
     
-    // Bind parameters
+    // Bind parameters with more careful handling
+    $dateOfBirth = isset($data['dateOfBirth']) && !empty($data['dateOfBirth']) ? $data['dateOfBirth'] : null;
+    $gender = isset($data['gender']) && !empty($data['gender']) ? $data['gender'] : '';
+    
     $insert_stmt->bindParam(':first_name', $data['firstName']);
     $insert_stmt->bindParam(':last_name', $data['lastName']);
     $insert_stmt->bindParam(':email', $data['email']);
     $insert_stmt->bindParam(':phone', $data['phone']);
     $insert_stmt->bindParam(':password_hash', $password_hash);
-    $insert_stmt->bindParam(':date_of_birth', $data['dateOfBirth'] ?? null);
+    $insert_stmt->bindParam(':date_of_birth', $dateOfBirth);
     $insert_stmt->bindParam(':address', $data['address']);
     $insert_stmt->bindParam(':city', $data['city']);
     $insert_stmt->bindParam(':state', $data['state']);
     $insert_stmt->bindParam(':postal_code', $data['postalCode']);
-    $insert_stmt->bindParam(':gender', $data['gender'] ?? '');
+    $insert_stmt->bindParam(':gender', $gender);
     
     // Handle boolean preferences
     $email_notifications = isset($data['newsletter']) && $data['newsletter'] ? 1 : 0;
@@ -121,11 +131,17 @@ try {
             'user' => $user_data
         ], 201);
     } else {
+        $errorInfo = $insert_stmt->errorInfo();
+        error_log("Database insert error: " . json_encode($errorInfo));
         sendResponse(false, 'Registration failed. Please try again.', null, 500);
     }
     
 } catch (Exception $e) {
     error_log("Registration error: " . $e->getMessage());
-    sendResponse(false, 'An error occurred during registration', null, 500);
+    error_log("Stack trace: " . $e->getTraceAsString());
+    sendResponse(false, 'An error occurred during registration: ' . $e->getMessage(), null, 500);
+} catch (Error $e) {
+    error_log("PHP Error: " . $e->getMessage());
+    sendResponse(false, 'A system error occurred during registration', null, 500);
 }
 ?>

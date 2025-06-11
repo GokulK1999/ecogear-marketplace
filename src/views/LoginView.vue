@@ -165,17 +165,24 @@
             </div>
           </div>
 
-          <!-- Demo Credentials -->
-          <div class="demo-credentials card mt-4 border-info">
-            <div class="card-header bg-info text-white">
+          <!-- Registration Info -->
+          <div class="registration-info card mt-4 border-success">
+            <div class="card-header bg-success text-white">
               <h6 class="mb-0">
-                <i class="bi bi-info-circle me-2"></i>Demo Credentials
+                <i class="bi bi-info-circle me-2"></i>New to EcoGear?
               </h6>
             </div>
             <div class="card-body">
-              <p class="mb-2"><strong>Email:</strong> gokul@ecogear.com</p>
-              <p class="mb-2"><strong>Password:</strong> password</p>
-              <small class="text-muted">Use these credentials to test the login functionality</small>
+              <p class="mb-2">Create an account to start your sustainable journey!</p>
+              <small class="text-muted">
+                Registration is free and takes less than 2 minutes. 
+                You can login immediately after registering.
+              </small>
+              <div class="mt-3">
+                <router-link to="/register" class="btn btn-success btn-sm">
+                  <i class="bi bi-person-plus me-1"></i>Create Account
+                </router-link>
+              </div>
             </div>
           </div>
         </div>
@@ -407,7 +414,7 @@ export default {
 }
 
 /* Demo credentials card */
-.demo-credentials {
+.registration-info {
   border-left: 4px solid #0dcaf0;
 }
 
