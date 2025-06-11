@@ -36,16 +36,21 @@
                 <div class="profile-picture mb-3">
                   <div class="avatar-container position-relative">
                     <img 
-                      :src="userProfile.profilePicture || '/src/assets/images/default-avatar.jpg'" 
+                      :src="profilePictureUrl" 
                       :alt="userProfile.firstName + ' ' + userProfile.lastName"
                       class="avatar rounded-circle"
+                      @error="$event.target.src = '/src/assets/images/default-avatar.jpg'"
                     >
                     <button 
                       class="btn btn-sm btn-eco-primary avatar-edit-btn position-absolute"
                       @click="changeProfilePicture"
                       v-if="isEditMode"
+                      :disabled="isUploadingImage"
                     >
-                      <i class="bi bi-camera"></i>
+                      <span v-if="isUploadingImage">
+                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                      </span>
+                      <i v-else class="bi bi-camera"></i>
                     </button>
                   </div>
                 </div>
@@ -430,6 +435,7 @@ export default {
   data() {
     return {
       isEditMode: false,
+      isUploadingImage: false,
       
       // User profile data - demonstrates data management
       userProfile: {
@@ -467,6 +473,22 @@ export default {
         'Negeri Sembilan', 'Pahang', 'Penang', 'Perak', 'Perlis', 'Putrajaya',
         'Sabah', 'Sarawak', 'Selangor', 'Terengganu'
       ]
+    }
+  },
+  
+  computed: {
+    // Get profile picture URL
+    profilePictureUrl() {
+      if (this.userProfile.profilePicture) {
+        // If it's an uploaded image, use the backend URL
+        if (this.userProfile.profilePicture.startsWith('/uploads/')) {
+          return `http://localhost:8000${this.userProfile.profilePicture}`
+        }
+        // Otherwise use the existing path
+        return this.userProfile.profilePicture
+      }
+      // Default avatar
+      return '/src/assets/images/default-avatar.jpg'
     }
   },
   
@@ -601,10 +623,87 @@ export default {
       }
     },
     
-    // Change profile picture
-    changeProfilePicture() {
-      // This would normally open file picker
-      alert('Profile picture change functionality would be implemented here')
+    // Change profile picture - NEW FUNCTIONALITY
+    async changeProfilePicture() {
+      try {
+        // Create file input element
+        const input = document.createElement('input')
+        input.type = 'file'
+        input.accept = 'image/*'
+        input.style.display = 'none'
+        
+        // Add event listener
+        input.addEventListener('change', async (event) => {
+          const file = event.target.files[0]
+          if (file) {
+            await this.uploadProfileImage(file)
+          }
+        })
+        
+        // Trigger file picker
+        document.body.appendChild(input)
+        input.click()
+        document.body.removeChild(input)
+        
+      } catch (error) {
+        console.error('Error opening file picker:', error)
+        alert('Error opening file picker')
+      }
+    },
+    
+    // Upload profile image - NEW FUNCTIONALITY
+    async uploadProfileImage(file) {
+      try {
+        // Validate file
+        const maxSize = 5 * 1024 * 1024 // 5MB
+        if (file.size > maxSize) {
+          alert('File size too large. Maximum size is 5MB.')
+          return
+        }
+        
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+        if (!allowedTypes.includes(file.type)) {
+          alert('Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed.')
+          return
+        }
+        
+        this.isUploadingImage = true
+        
+        // Get user data
+        const userData = localStorage.getItem('ecogear_user')
+        if (!userData) {
+          throw new Error('User not authenticated')
+        }
+        
+        const user = JSON.parse(userData)
+        
+        // Create FormData
+        const formData = new FormData()
+        formData.append('profile_image', file)
+        formData.append('user_id', user.user_id)
+        
+        // Upload image
+        const response = await fetch('http://localhost:8000/api/user/upload-image.php', {
+          method: 'POST',
+          body: formData
+        })
+        
+        const result = await response.json()
+        
+        if (result.success) {
+          // Update profile picture in UI
+          this.userProfile.profilePicture = result.data.image_path
+          alert('Profile picture updated successfully!')
+        } else {
+          throw new Error(result.message)
+        }
+        
+      } catch (error) {
+        console.error('Image upload error:', error)
+        alert(`Failed to upload image: ${error.message}`)
+      } finally {
+        this.isUploadingImage = false
+      }
     },
     
     // Change password
