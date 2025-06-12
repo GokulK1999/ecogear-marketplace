@@ -191,7 +191,7 @@ export default {
           id: 2,
           name: 'Hiking Equipment',
           description: 'Sustainable backpacks, boots, and trail accessories',
-          icon: 'bi bi-mountain'
+          icon: 'bi bi-backpack'
         },
         {
           id: 3,

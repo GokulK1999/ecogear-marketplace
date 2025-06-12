@@ -39,7 +39,7 @@
             </a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="/products"><i class="bi bi-tree me-2"></i>Camping Gear</a></li>
-              <li><a class="dropdown-item" href="/products"><i class="bi bi-mountain me-2"></i>Hiking Equipment</a></li>
+              <li><a class="dropdown-item" href="/products"><i class="bi bi-backpack me-2"></i>Hiking Equipment</a></li>
               <li><a class="dropdown-item" href="/products"><i class="bi bi-water me-2"></i>Water Sports</a></li>
               <li><a class="dropdown-item" href="/products"><i class="bi bi-sun me-2"></i>Solar Tech</a></li>
             </ul>
