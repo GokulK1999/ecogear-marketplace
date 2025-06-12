@@ -12,6 +12,7 @@
 import NavBar from './components/NavBar.vue'
 import AppFooter from './components/AppFooter.vue'
 import { useCartStore } from '@/stores/cartStore'
+import { useOrdersStore } from '@/stores/ordersStore'
 
 export default {
   name: 'App',
@@ -21,11 +22,15 @@ export default {
   },
   setup() {
     const cartStore = useCartStore()
-    return { cartStore }
+    const ordersStore = useOrdersStore()
+    return { cartStore, ordersStore }
   },
   mounted() {
     // Initialize cart from localStorage when app starts
     this.cartStore.initializeCart()
+    
+    // Initialize orders store
+    this.ordersStore.initializeOrders()
   }
 }
 </script>

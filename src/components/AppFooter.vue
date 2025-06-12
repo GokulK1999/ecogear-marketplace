@@ -59,7 +59,7 @@
             </li>
             <li class="mb-2">
               <a href="#" class="text-light text-decoration-none">
-                <i class="bi bi-mountain me-2"></i>Hiking Equipment
+                <i class="bi bi-backpack me-2"></i>Hiking Equipment
               </a>
             </li>
             <li class="mb-2">
@@ -108,15 +108,15 @@
           <div class="contact-info">
             <div class="mb-2">
               <i class="bi bi-geo-alt text-success me-2"></i>
-              <small>123 Adventure St<br>Mountain View, CA 94041</small>
+              <small>Swinburne University of Technology</small>
             </div>
             <div class="mb-2">
               <i class="bi bi-telephone text-success me-2"></i>
-              <small>+1 (555) 123-4567</small>
+              <small>+1 (555) 112-6745</small>
             </div>
             <div class="mb-2">
               <i class="bi bi-envelope text-success me-2"></i>
-              <small>hello@ecogear.com</small>
+              <small>101233195@students.swinburne.edu.my</small>
             </div>
           </div>
         </div>
@@ -127,7 +127,7 @@
         <div class="col-md-6 mb-2">
           <small class="text-muted">
             © 2024 EcoGear. All rights reserved. 
-            <span class="text-success">Made with ♻️ for a sustainable future.</span>
+            <span class="text-success">Made by Gokul Kalla with ♻️ for a sustainable future.</span>
           </small>
         </div>
         <div class="col-md-6 text-md-end">

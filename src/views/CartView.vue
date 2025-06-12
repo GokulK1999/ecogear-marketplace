@@ -365,6 +365,7 @@
 
 <script>
 import { useCartStore } from '@/stores/cartStore'
+import { useOrdersStore } from '@/stores/ordersStore'
 import ToastNotification from '@/components/ToastNotification.vue'
 
 export default {
@@ -374,7 +375,8 @@ export default {
   },
   setup() {
     const cartStore = useCartStore()
-    return { cartStore }
+    const ordersStore = useOrdersStore()
+    return { cartStore, ordersStore }
   },
   data() {
     return {
@@ -456,7 +458,7 @@ export default {
       this.showToast(`Shipping updated to: ${shippingName}`, 'info')
     },
 
-    // Proceed to checkout - NEW FUNCTION
+    // Proceed to checkout - UPDATED TO SAVE REAL ORDERS
     proceedToCheckout() {
       // Check if user is logged in
       const userData = localStorage.getItem('ecogear_user')
@@ -468,14 +470,33 @@ export default {
           this.$router.push('/login')
         }, 1500)
       } else {
-        // User is logged in - simulate order placement
-        this.showToast('Order placed successfully! 🎉', 'success')
-        
-        // Clear cart after successful order
-        setTimeout(() => {
-          this.cartStore.clearCart()
-          this.$router.push('/purchases')
-        }, 2000)
+        try {
+          // Create order using orders store
+          const cartData = {
+            items: this.cartStore.items,
+            subtotal: this.cartStore.subtotal,
+            shippingCost: this.cartStore.shippingCost,
+            taxAmount: this.cartStore.taxAmount,
+            discountAmount: this.cartStore.discountAmount,
+            total: this.cartStore.total
+          }
+
+          // Use the orders store from setup
+          const newOrder = this.ordersStore.createOrder(cartData)
+          
+          // Show success message
+          this.showToast(`Order #${newOrder.orderNumber} placed successfully! 🎉`, 'success')
+          
+          // Clear cart after successful order
+          setTimeout(() => {
+            this.cartStore.clearCart()
+            this.$router.push('/purchases')
+          }, 2000)
+          
+        } catch (error) {
+          console.error('Error creating order:', error)
+          this.showToast('Error placing order. Please try again.', 'error')
+        }
       }
     },
 

@@ -410,12 +410,25 @@
         </div>
       </div>
     </div>
+
+    <!-- Toast Notifications -->
+    <ToastNotification
+      :show="toast.show"
+      :message="toast.message"
+      :type="toast.type"
+      @hide="hideToast"
+    />
   </div>
 </template>
 
 <script>
+import ToastNotification from '@/components/ToastNotification.vue'
+
 export default {
   name: 'RegisterView',
+  components: {
+    ToastNotification
+  },
   data() {
     return {
       // Form data
@@ -443,6 +456,13 @@ export default {
       isSubmitting: false,
       showPassword: false,
       showConfirmPassword: false,
+      
+      // Toast notification
+      toast: {
+        show: false,
+        message: '',
+        type: 'success'
+      },
       
       // Malaysian states for dropdown
       malaysianStates: [
@@ -633,11 +653,11 @@ export default {
       return Object.keys(this.errors).length === 0
     },
     
-    // Submit registration
+    // Submit registration - UPDATED WITH TOAST
     async submitRegistration() {
       // Validate form
       if (!this.validateForm()) {
-        alert('Please fix the form errors before submitting.')
+        this.showToast('Please fix the form errors before submitting.', 'error')
         return
       }
       
@@ -648,17 +668,33 @@ export default {
         await this.callRegistrationAPI()
         
         // Show success message
-        alert('Registration successful! Welcome to EcoGear! You can now login with your credentials.')
+        this.showToast('Registration successful! Welcome to EcoGear! 🎉', 'success')
         
-        // Redirect to login page
-        this.$router.push('/login')
+        // Redirect to login page after showing success
+        setTimeout(() => {
+          this.$router.push('/login')
+        }, 2000)
         
       } catch (error) {
-        alert(`Registration failed: ${error.message}`)
+        this.showToast(`Registration failed: ${error.message}`, 'error')
         console.error('Registration error:', error)
       } finally {
         this.isSubmitting = false
       }
+    },
+    
+    // Show toast notification
+    showToast(message, type = 'success') {
+      this.toast = {
+        show: true,
+        message,
+        type
+      }
+    },
+
+    // Hide toast notification
+    hideToast() {
+      this.toast.show = false
     },
     
     // Real registration API call

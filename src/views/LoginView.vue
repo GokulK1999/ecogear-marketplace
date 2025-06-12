@@ -188,12 +188,25 @@
         </div>
       </div>
     </div>
+
+    <!-- Toast Notifications -->
+    <ToastNotification
+      :show="toast.show"
+      :message="toast.message"
+      :type="toast.type"
+      @hide="hideToast"
+    />
   </div>
 </template>
 
 <script>
+import ToastNotification from '@/components/ToastNotification.vue'
+
 export default {
   name: 'LoginView',
+  components: {
+    ToastNotification
+  },
   data() {
     return {
       // Login form data
@@ -211,6 +224,13 @@ export default {
       showPassword: false,
       loginError: '',
       loginSuccess: '',
+      
+      // Toast notification
+      toast: {
+        show: false,
+        message: '',
+        type: 'success'
+      },
       
       // Demo credentials
       demoCredentials: {
@@ -279,7 +299,7 @@ export default {
       return Object.keys(this.errors).length === 0
     },
     
-    // Submit login
+    // Submit login - UPDATED WITH TOAST
     async submitLogin() {
       // Clear previous messages
       this.loginError = ''
@@ -296,16 +316,16 @@ export default {
         // Simulate login API call
         await this.simulateLogin()
         
-        // Show success message
-        this.loginSuccess = 'Login successful! Redirecting...'
+        // Show success message with toast
+        this.showToast('Login successful! Welcome back! 🎉', 'success')
         
-        // Simulate redirect after 1 second
+        // Redirect after showing success message
         setTimeout(() => {
           this.$router.push('/account')
-        }, 1000)
+        }, 1500)
         
       } catch (error) {
-        this.loginError = error.message
+        this.showToast(error.message, 'error')
       } finally {
         this.isLoggingIn = false
       }
@@ -352,9 +372,23 @@ export default {
       }
     },
     
-    // Forgot password
+    // Forgot password - UPDATED WITH TOAST
     forgotPassword() {
-      alert('Forgot password functionality would be implemented here. For demo, use: demo@ecogear.com / password')
+      this.showToast('Forgot password functionality would be implemented here. For demo purposes, contact admin.', 'info')
+    },
+
+    // Show toast notification
+    showToast(message, type = 'success') {
+      this.toast = {
+        show: true,
+        message,
+        type
+      }
+    },
+
+    // Hide toast notification
+    hideToast() {
+      this.toast.show = false
     }
   },
   

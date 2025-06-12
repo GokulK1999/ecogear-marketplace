@@ -102,14 +102,26 @@
         </div>
       </div>
     </div>
+
+    <!-- Toast Notifications -->
+    <ToastNotification
+      :show="toast.show"
+      :message="toast.message"
+      :type="toast.type"
+      @hide="hideToast"
+    />
   </nav>
 </template>
 
 <script>
 import { useCartStore } from '@/stores/cartStore'
+import ToastNotification from '@/components/ToastNotification.vue'
 
 export default {
   name: 'NavBar',
+  components: {
+    ToastNotification
+  },
   setup() {
     const cartStore = useCartStore()
     return { cartStore }
@@ -117,7 +129,13 @@ export default {
   data() {
     return {
       isLoggedIn: false,
-      userName: ''
+      userName: '',
+      // Toast notification
+      toast: {
+        show: false,
+        message: '',
+        type: 'success'
+      }
     }
   },
   computed: {
@@ -144,7 +162,7 @@ export default {
       }
     },
 
-    // Handle logout
+    // Handle logout - UPDATED WITH TOAST
     logout() {
       // Clear localStorage
       localStorage.removeItem('ecogear_user')
@@ -156,11 +174,25 @@ export default {
       // Redirect to home page
       this.$router.push('/')
       
-      // Show logout message
-      alert('You have been logged out successfully!')
+      // Show logout toast message
+      this.showToast('You have been logged out successfully! 👋', 'success')
       
       // Trigger custom event for other components
       window.dispatchEvent(new Event('userLoggedOut'))
+    },
+
+    // Show toast notification  
+    showToast(message, type = 'success') {
+      this.toast = {
+        show: true,
+        message,
+        type
+      }
+    },
+
+    // Hide toast notification
+    hideToast() {
+      this.toast.show = false
     }
   },
   

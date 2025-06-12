@@ -7,14 +7,14 @@
           <div class="col-md-8">
             <h1 class="display-5 fw-bold text-dark mb-2">My Purchases</h1>
             <p class="lead text-muted mb-0">
-              Track and manage your orders - {{ orders.length }} total orders
+              Track and manage your orders - {{ userOrders.length }} total orders
             </p>
           </div>
           <div class="col-md-4 text-md-end">
             <div class="purchase-actions">
-              <button class="btn btn-eco-primary" @click="showAddOrderModal">
-                <i class="bi bi-plus-circle me-2"></i>Add Order
-              </button>
+              <router-link to="/products" class="btn btn-eco-primary">
+                <i class="bi bi-cart-plus me-2"></i>Continue Shopping
+              </router-link>
             </div>
           </div>
         </div>
@@ -23,7 +23,7 @@
 
     <div class="container py-4">
       <!-- Filter and Search Bar -->
-      <div class="orders-controls mb-4">
+      <div class="orders-controls mb-4" v-if="userOrders.length > 0">
         <div class="row g-3 align-items-center">
           <!-- Search -->
           <div class="col-md-4">
@@ -109,14 +109,9 @@
               <div class="col-md-3 text-md-end">
                 <div class="order-actions">
                   <button 
-                    class="btn btn-outline-primary btn-sm me-2"
-                    @click="editOrder(order)"
-                  >
-                    <i class="bi bi-pencil"></i>
-                  </button>
-                  <button 
                     class="btn btn-outline-danger btn-sm"
-                    @click="deleteOrder(order.id)"
+                    @click="deleteOrder(order.id, order.orderNumber)"
+                    v-if="order.status === 'pending' || order.status === 'cancelled'"
                   >
                     <i class="bi bi-trash"></i>
                   </button>
@@ -250,86 +245,31 @@
       </div>
     </div>
 
-    <!-- Add/Edit Order Modal -->
-    <div class="modal fade" id="orderModal" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">
-              <i class="bi bi-plus-circle text-success me-2"></i>
-              {{ editingOrder ? 'Edit Order' : 'Add New Order' }}
-            </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <form @submit.prevent="saveOrder">
-              <div class="row g-3">
-                <!-- Order Number -->
-                <div class="col-md-6">
-                  <label class="form-label">Order Number</label>
-                  <input 
-                    type="text" 
-                    class="form-control"
-                    v-model="orderForm.orderNumber"
-                    required
-                  >
-                </div>
-                
-                <!-- Status -->
-                <div class="col-md-6">
-                  <label class="form-label">Status</label>
-                  <select class="form-select" v-model="orderForm.status" required>
-                    <option value="pending">Pending</option>
-                    <option value="processing">Processing</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                </div>
-                
-                <!-- Order Date -->
-                <div class="col-md-6">
-                  <label class="form-label">Order Date</label>
-                  <input 
-                    type="date" 
-                    class="form-control"
-                    v-model="orderForm.orderDate"
-                    required
-                  >
-                </div>
-                
-                <!-- Total Amount -->
-                <div class="col-md-6">
-                  <label class="form-label">Total Amount (RM)</label>
-                  <input 
-                    type="number" 
-                    step="0.01"
-                    class="form-control"
-                    v-model="orderForm.total"
-                    required
-                  >
-                </div>
-              </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              Cancel
-            </button>
-            <button type="button" class="btn btn-eco-primary" @click="saveOrder">
-              <i class="bi bi-check-circle me-1"></i>
-              {{ editingOrder ? 'Update Order' : 'Add Order' }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Toast Notifications -->
+    <ToastNotification
+      :show="toast.show"
+      :message="toast.message"
+      :type="toast.type"
+      @hide="hideToast"
+    />
   </div>
 </template>
 
 <script>
+import { useOrdersStore } from '@/stores/ordersStore'
+import { useCartStore } from '@/stores/cartStore'
+import ToastNotification from '@/components/ToastNotification.vue'
+
 export default {
   name: 'PurchasesView',
+  components: {
+    ToastNotification
+  },
+  setup() {
+    const ordersStore = useOrdersStore()
+    const cartStore = useCartStore()
+    return { ordersStore, cartStore }
+  },
   data() {
     return {
       // Filter states
@@ -337,119 +277,27 @@ export default {
       statusFilter: 'all',
       dateFilter: 'all',
       
-      // Modal states
-      editingOrder: null,
-      orderForm: {
-        orderNumber: '',
-        status: 'pending',
-        orderDate: '',
-        total: 0
-      },
-      
-      // Orders data - demonstrates arrays and data management
-      orders: [
-        {
-          id: 1,
-          orderNumber: 'ECO-2024-001',
-          orderDate: '2024-01-15',
-          status: 'delivered',
-          subtotal: 1597.90,
-          shipping: 46.95,
-          tax: 131.59,
-          discount: 0,
-          total: 1776.44,
-          items: [
-            {
-              id: 1,
-              name: 'EcoTent Pro 4',
-              brand: 'EcoGear',
-              price: 1409.95,
-              quantity: 1,
-              image: '/src/assets/images/eco-tent.jpg'
-            },
-            {
-              id: 2,
-              name: 'Bamboo Water Bottle',
-              brand: 'BambooLife',
-              price: 164.45,
-              quantity: 1,
-              image: '/src/assets/images/bamboo-bottle.jpg'
-            }
-          ],
-          shippingAddress: {
-            name: 'John Doe',
-            address: '123 Jalan Sustainable',
-            city: 'Kuala Lumpur',
-            state: 'Kuala Lumpur',
-            postalCode: '50000'
-          }
-        },
-        {
-          id: 2,
-          orderNumber: 'ECO-2024-002',
-          orderDate: '2024-02-03',
-          status: 'shipped',
-          subtotal: 892.95,
-          shipping: 46.95,
-          tax: 75.19,
-          discount: 89.30,
-          total: 925.79,
-          items: [
-            {
-              id: 1,
-              name: 'Solar Backpack 35L',
-              brand: 'SolarTrek',
-              price: 892.95,
-              quantity: 1,
-              image: '/src/assets/images/solar-backpack.jpg'
-            }
-          ],
-          shippingAddress: {
-            name: 'John Doe',
-            address: '123 Jalan Sustainable',
-            city: 'Kuala Lumpur',
-            state: 'Kuala Lumpur',
-            postalCode: '50000'
-          }
-        },
-        {
-          id: 3,
-          orderNumber: 'ECO-2024-003',
-          orderDate: '2024-02-20',
-          status: 'processing',
-          subtotal: 751.90,
-          shipping: 46.95,
-          tax: 63.91,
-          discount: 0,
-          total: 862.76,
-          items: [
-            {
-              id: 1,
-              name: 'Solar Power Bank',
-              brand: 'SolarCharge',
-              price: 375.95,
-              quantity: 2,
-              image: '/src/assets/images/bamboo-bottle.jpg'
-            }
-          ],
-          shippingAddress: {
-            name: 'John Doe',
-            address: '123 Jalan Sustainable',
-            city: 'Kuala Lumpur',
-            state: 'Kuala Lumpur',
-            postalCode: '50000'
-          }
-        }
-      ],
-      
-      filteredOrders: []
+      filteredOrders: [],
+
+      // Toast notification
+      toast: {
+        show: false,
+        message: '',
+        type: 'success'
+      }
+    }
+  },
+
+  computed: {
+    userOrders() {
+      return this.ordersStore.userOrders
     }
   },
   
   methods: {
     // Filter orders based on search and filters
     filterOrders() {
-      let filtered = [...this.orders]
+      let filtered = [...this.userOrders]
       
       // Search filter
       if (this.searchQuery.trim()) {
@@ -483,123 +331,80 @@ export default {
       this.filteredOrders = filtered
     },
     
-    // Show add order modal
-    showAddOrderModal() {
-      this.editingOrder = null
-      this.orderForm = {
-        orderNumber: 'ECO-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-3),
-        status: 'pending',
-        orderDate: new Date().toISOString().split('T')[0],
-        total: 0
-      }
-      
-      // Show Bootstrap modal
-      const modal = new bootstrap.Modal(document.getElementById('orderModal'))
-      modal.show()
-    },
-    
-    // Edit order
-    editOrder(order) {
-      this.editingOrder = order
-      this.orderForm = {
-        orderNumber: order.orderNumber,
-        status: order.status,
-        orderDate: order.orderDate,
-        total: order.total
-      }
-      
-      // Show Bootstrap modal
-      const modal = new bootstrap.Modal(document.getElementById('orderModal'))
-      modal.show()
-    },
-    
-    // Save order (add or edit)
-    saveOrder() {
-      if (this.editingOrder) {
-        // Update existing order
-        const index = this.orders.findIndex(o => o.id === this.editingOrder.id)
-        if (index !== -1) {
-          this.orders[index] = {
-            ...this.orders[index],
-            orderNumber: this.orderForm.orderNumber,
-            status: this.orderForm.status,
-            orderDate: this.orderForm.orderDate,
-            total: parseFloat(this.orderForm.total)
-          }
+    // Delete order - UPDATED WITH TOAST
+    deleteOrder(orderId, orderNumber) {
+      try {
+        const success = this.ordersStore.deleteOrder(orderId)
+        if (success) {
+          this.showToast(`Order #${orderNumber} deleted successfully`, 'success')
+          this.filterOrders() // Refresh the filtered list
+        } else {
+          this.showToast('Cannot delete this order. Only pending or cancelled orders can be deleted.', 'warning')
         }
-        alert('Order updated successfully!')
-      } else {
-        // Add new order
-        const newOrder = {
-          id: Date.now(),
-          orderNumber: this.orderForm.orderNumber,
-          orderDate: this.orderForm.orderDate,
-          status: this.orderForm.status,
-          subtotal: parseFloat(this.orderForm.total) * 0.85,
-          shipping: 46.95,
-          tax: parseFloat(this.orderForm.total) * 0.08,
-          discount: 0,
-          total: parseFloat(this.orderForm.total),
-          items: [
-            {
-              id: 1,
-              name: 'Sample Product',
-              brand: 'EcoGear',
-              price: parseFloat(this.orderForm.total) * 0.85,
-              quantity: 1,
-              image: '/src/assets/images/eco-tent.jpg'
-            }
-          ],
-          shippingAddress: {
-            name: 'John Doe',
-            address: '123 Jalan Sustainable',
-            city: 'Kuala Lumpur',
-            state: 'Kuala Lumpur',
-            postalCode: '50000'
-          }
-        }
-        
-        this.orders.unshift(newOrder)
-        alert('Order added successfully!')
-      }
-      
-      // Hide modal
-      const modal = bootstrap.Modal.getInstance(document.getElementById('orderModal'))
-      modal.hide()
-      
-      // Refresh filtered orders
-      this.filterOrders()
-    },
-    
-    // Delete order
-    deleteOrder(orderId) {
-      if (confirm('Are you sure you want to delete this order?')) {
-        const index = this.orders.findIndex(o => o.id === orderId)
-        if (index !== -1) {
-          this.orders.splice(index, 1)
-          this.filterOrders()
-          alert('Order deleted successfully!')
-        }
+      } catch (error) {
+        this.showToast('Error deleting order', 'error')
       }
     },
     
-    // Track order
+    // Track order - UPDATED WITH TOAST
     trackOrder(order) {
-      alert(`Tracking information for Order #${order.orderNumber}:\n\nStatus: ${order.status}\nEstimated Delivery: 3-5 business days`)
+      const trackingMessages = {
+        pending: 'Your order is being prepared for processing.',
+        processing: 'Your order is being processed and will ship soon.',
+        shipped: 'Your order is on the way! Expected delivery in 2-3 business days.',
+        delivered: 'Your order has been delivered successfully!',
+        cancelled: 'This order has been cancelled.'
+      }
+
+      const message = trackingMessages[order.status] || 'Tracking information unavailable.'
+      this.showToast(`Order #${order.orderNumber}: ${message}`, 'info')
     },
     
-    // Reorder items
+    // Reorder items - UPDATED WITH TOAST
     reorderItems(order) {
-      if (confirm('Add these items to your cart?')) {
-        alert('Items added to cart! Redirecting to cart...')
-        // Would normally add items to cart store
-        this.$router.push('/cart')
+      try {
+        // Add each item from the order to the cart
+        order.items.forEach(item => {
+          const product = {
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            originalPrice: item.originalPrice || item.price,
+            image: item.image,
+            brand: item.brand,
+            inStock: true // Assume in stock for reorder
+          }
+          this.cartStore.addItem(product, item.quantity)
+        })
+
+        this.showToast(`${order.items.length} items added to cart from Order #${order.orderNumber}`, 'success')
+        
+        // Navigate to cart after a short delay
+        setTimeout(() => {
+          this.$router.push('/cart')
+        }, 1500)
+      } catch (error) {
+        this.showToast('Error adding items to cart', 'error')
       }
     },
     
-    // Download invoice
+    // Download invoice - UPDATED WITH TOAST
     downloadInvoice(order) {
-      alert(`Invoice for Order #${order.orderNumber} would be downloaded here`)
+      this.showToast(`Invoice for Order #${order.orderNumber} would be downloaded in a real application`, 'info')
+    },
+
+    // Show toast notification
+    showToast(message, type = 'success') {
+      this.toast = {
+        show: true,
+        message,
+        type
+      }
+    },
+
+    // Hide toast notification
+    hideToast() {
+      this.toast.show = false
     },
     
     // Utility methods
@@ -639,8 +444,12 @@ export default {
     }
   },
   
-  // Initialize filtered orders
+  // Initialize when component mounts
   mounted() {
+    // Initialize orders store
+    this.ordersStore.initializeOrders()
+    
+    // Filter orders after initialization
     this.filterOrders()
   }
 }
@@ -689,17 +498,6 @@ export default {
 /* No orders state */
 .no-orders-icon i {
   font-size: 5rem;
-}
-
-/* Modal styling */
-.modal-content {
-  border-radius: 0.75rem;
-  border: none;
-}
-
-.modal-header {
-  border-bottom: 1px solid #e9ecef;
-  border-radius: 0.75rem 0.75rem 0 0;
 }
 
 /* Button styling */
