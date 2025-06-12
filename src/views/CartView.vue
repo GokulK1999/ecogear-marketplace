@@ -158,7 +158,7 @@
                           </div>
                           <button 
                             class="btn btn-outline-danger btn-sm"
-                            @click="removeItem(item.id)"
+                            @click="removeItem(item.id, item.name)"
                           >
                             <i class="bi bi-trash me-1"></i>Remove
                           </button>
@@ -242,15 +242,6 @@
                       </button>
                     </div>
                   </div>
-                  
-                  <!-- Coupon Message -->
-                  <div 
-                    v-if="couponMessage" 
-                    class="alert mt-3 mb-0"
-                    :class="couponMessage.success ? 'alert-success' : 'alert-danger'"
-                  >
-                    {{ couponMessage.text }}
-                  </div>
                 </div>
               </div>
 
@@ -274,6 +265,7 @@
                       :id="'shipping-' + shipping.id"
                       :value="shipping.id"
                       v-model="cartStore.selectedShipping"
+                      @change="onShippingChange(shipping.name)"
                     >
                     <label class="form-check-label d-flex justify-content-between w-100" :for="'shipping-' + shipping.id">
                       <div>
@@ -341,7 +333,7 @@
                   </div>
 
                   <!-- Checkout Button -->
-                  <button class="btn btn-eco-primary w-100 btn-lg mb-3">
+                  <button class="btn btn-eco-primary w-100 btn-lg mb-3" @click="proceedToCheckout">
                     <i class="bi bi-credit-card me-2"></i>
                     Proceed to Checkout
                   </button>
@@ -360,14 +352,26 @@
         </div>
       </div>
     </div>
+
+    <!-- Toast Notifications -->
+    <ToastNotification
+      :show="toast.show"
+      :message="toast.message"
+      :type="toast.type"
+      @hide="hideToast"
+    />
   </div>
 </template>
 
 <script>
 import { useCartStore } from '@/stores/cartStore'
+import ToastNotification from '@/components/ToastNotification.vue'
 
 export default {
   name: 'CartView',
+  components: {
+    ToastNotification
+  },
   setup() {
     const cartStore = useCartStore()
     return { cartStore }
@@ -375,63 +379,118 @@ export default {
   data() {
     return {
       couponCode: '',
-      couponMessage: null
+      // Toast notification
+      toast: {
+        show: false,
+        message: '',
+        type: 'success'
+      }
     }
   },
   methods: {
     // Update item quantity - demonstrates data manipulation
     updateQuantity(itemId, newQuantity) {
       if (newQuantity >= 1) {
+        const item = this.cartStore.items.find(item => item.id === itemId)
+        const oldQuantity = item ? item.quantity : 0
+        
         this.cartStore.updateQuantity(itemId, newQuantity)
+        
+        if (item && newQuantity !== oldQuantity) {
+          this.showToast(`Quantity updated to ${newQuantity}`, 'info')
+        }
       }
     },
 
-    // Remove item from cart
-    removeItem(itemId) {
-      if (confirm('Are you sure you want to remove this item from your cart?')) {
+    // Remove item from cart - UPDATED WITH TOAST
+    removeItem(itemId, itemName) {
+      try {
         this.cartStore.removeItem(itemId)
+        this.showToast(`${itemName} removed from cart`, 'success')
+      } catch (error) {
+        this.showToast('Error removing item from cart', 'error')
       }
     },
 
-    // Clear entire cart
+    // Clear entire cart - UPDATED WITH TOAST
     clearCart() {
-      if (confirm('Are you sure you want to clear your entire cart?')) {
+      try {
+        const itemCount = this.cartStore.itemCount
         this.cartStore.clearCart()
+        this.showToast(`Cart cleared! ${itemCount} items removed`, 'success')
+      } catch (error) {
+        this.showToast('Error clearing cart', 'error')
       }
     },
 
-    // Apply coupon code
+    // Apply coupon code - UPDATED WITH TOAST
     applyCoupon() {
       if (!this.couponCode.trim()) return
 
-      const result = this.cartStore.applyCoupon(this.couponCode.trim())
-      
-      this.couponMessage = {
-        success: result.success,
-        text: result.message
+      try {
+        const result = this.cartStore.applyCoupon(this.couponCode.trim())
+        
+        if (result.success) {
+          this.couponCode = ''
+          this.showToast(result.message, 'success')
+        } else {
+          this.showToast(result.message, 'error')
+        }
+      } catch (error) {
+        this.showToast('Error applying coupon', 'error')
       }
-
-      if (result.success) {
-        this.couponCode = ''
-      }
-
-      // Clear message after 3 seconds
-      setTimeout(() => {
-        this.couponMessage = null
-      }, 3000)
     },
 
-    // Remove applied coupon
+    // Remove applied coupon - UPDATED WITH TOAST
     removeCoupon() {
-      this.cartStore.removeCoupon()
-      this.couponMessage = {
-        success: false,
-        text: 'Coupon removed'
+      try {
+        this.cartStore.removeCoupon()
+        this.showToast('Coupon removed successfully', 'info')
+      } catch (error) {
+        this.showToast('Error removing coupon', 'error')
       }
+    },
 
-      setTimeout(() => {
-        this.couponMessage = null
-      }, 2000)
+    // Handle shipping method change
+    onShippingChange(shippingName) {
+      this.showToast(`Shipping updated to: ${shippingName}`, 'info')
+    },
+
+    // Proceed to checkout - NEW FUNCTION
+    proceedToCheckout() {
+      // Check if user is logged in
+      const userData = localStorage.getItem('ecogear_user')
+      
+      if (!userData) {
+        // User not logged in - redirect to login
+        this.showToast('Please login first to proceed with checkout', 'warning')
+        setTimeout(() => {
+          this.$router.push('/login')
+        }, 1500)
+      } else {
+        // User is logged in - simulate order placement
+        this.showToast('Order placed successfully! 🎉', 'success')
+        
+        // Clear cart after successful order
+        setTimeout(() => {
+          this.cartStore.clearCart()
+          this.$router.push('/purchases')
+        }, 2000)
+      }
+    },
+
+    // Show toast notification
+    showToast(message, type = 'success') {
+      this.toast = {
+        show: true,
+        message,
+        type
+      }
+    },
+
+    // Hide toast notification
+    hideToast() {
+      this.toast.show = false
     },
 
     // Format price - demonstrates filters

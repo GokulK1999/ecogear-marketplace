@@ -327,15 +327,32 @@
         </div>
       </div>
     </div>
+
+    <!-- Toast Notifications -->
+    <ToastNotification
+      :show="toast.show"
+      :message="toast.message"
+      :type="toast.type"
+      @hide="hideToast"
+    />
   </div>
 </template>
 
 <script>
 // Import JSON data
 import productsData from '@/assets/data/products.json'
+import { useCartStore } from '@/stores/cartStore'
+import ToastNotification from '@/components/ToastNotification.vue'
 
 export default {
   name: 'ProductsView',
+  components: {
+    ToastNotification
+  },
+  setup() {
+    const cartStore = useCartStore()
+    return { cartStore }
+  },
   data() {
     return {
       // Arrays - demonstrating use of arrays
@@ -354,6 +371,13 @@ export default {
       // Pagination
       currentPage: 1,
       itemsPerPage: 6,
+      
+      // Toast notification
+      toast: {
+        show: false,
+        message: '',
+        type: 'success'
+      },
       
       // Price ranges for filtering
       priceRanges: [
@@ -513,12 +537,37 @@ export default {
       this.filterProducts()
     },
     
-    // Add to cart functionality
+    // Add to cart functionality - FIXED VERSION
     addToCart(product) {
       if (product.inStock) {
-        // Here we would normally add to cart store/state
-        alert(`${product.name} added to cart!`)
+        try {
+          // Add to cart store
+          this.cartStore.addItem(product, 1)
+          
+          // Show success toast
+          this.showToast(`${product.name} added to cart!`, 'success')
+          
+        } catch (error) {
+          console.error('Error adding to cart:', error)
+          this.showToast('Error adding item to cart. Please try again.', 'error')
+        }
+      } else {
+        this.showToast('This item is currently out of stock.', 'warning')
       }
+    },
+    
+    // Show toast notification
+    showToast(message, type = 'success') {
+      this.toast = {
+        show: true,
+        message,
+        type
+      }
+    },
+    
+    // Hide toast notification
+    hideToast() {
+      this.toast.show = false
     }
   },
   

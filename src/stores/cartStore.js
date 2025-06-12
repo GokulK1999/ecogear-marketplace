@@ -2,45 +2,8 @@ import { defineStore } from 'pinia'
 
 export const useCartStore = defineStore('cart', {
   state: () => ({
-    items: [
-      // Sample cart items for demonstration
-      {
-        id: 1,
-        productId: 1,
-        name: "EcoTent Pro 4",
-        price: 1409.95,
-        originalPrice: 1644.95,
-        image: "/src/assets/images/eco-tent.jpg",
-        brand: "EcoGear",
-        quantity: 2,
-        inStock: true,
-        maxQuantity: 10
-      },
-      {
-        id: 2,
-        productId: 2,
-        name: "Solar Backpack 35L",
-        price: 892.95,
-        originalPrice: 1080.95,
-        image: "/src/assets/images/solar-backpack.jpg",
-        brand: "SolarTrek",
-        quantity: 1,
-        inStock: true,
-        maxQuantity: 5
-      },
-      {
-        id: 3,
-        productId: 3,
-        name: "Bamboo Water Bottle",
-        price: 164.45,
-        originalPrice: 187.95,
-        image: "/src/assets/images/bamboo-bottle.jpg",
-        brand: "BambooLife",
-        quantity: 3,
-        inStock: true,
-        maxQuantity: 20
-      }
-    ],
+    items: [], // Start with empty cart - no predefined items!
+    
     // Shipping options
     shippingOptions: [
       { id: 'standard', name: 'Standard Shipping (5-7 days)', price: 46.95 },
@@ -59,7 +22,10 @@ export const useCartStore = defineStore('cart', {
     ],
     
     // Tax rate
-    taxRate: 0.08 // 8% tax
+    taxRate: 0.08, // 8% tax
+    
+    // Loading state for UI feedback
+    isLoading: false
   }),
 
   getters: {
@@ -148,23 +114,36 @@ export const useCartStore = defineStore('cart', {
   },
 
   actions: {
-    // Update item quantity
-    updateQuantity(itemId, newQuantity) {
-      const item = this.items.find(item => item.id === itemId)
-      if (item) {
-        if (newQuantity <= 0) {
-          this.removeItem(itemId)
-        } else if (newQuantity <= item.maxQuantity) {
-          item.quantity = newQuantity
+    // Initialize cart from localStorage
+    initializeCart() {
+      try {
+        const savedCart = localStorage.getItem('ecogear_cart')
+        if (savedCart) {
+          const cartData = JSON.parse(savedCart)
+          this.items = cartData.items || []
+          this.selectedShipping = cartData.selectedShipping || 'standard'
+          this.appliedCoupon = cartData.appliedCoupon || null
         }
+      } catch (error) {
+        console.error('Error loading cart from localStorage:', error)
+        // Reset to empty cart if there's an error
+        this.items = []
+        this.selectedShipping = 'standard'
+        this.appliedCoupon = null
       }
     },
 
-    // Remove item from cart
-    removeItem(itemId) {
-      const index = this.items.findIndex(item => item.id === itemId)
-      if (index !== -1) {
-        this.items.splice(index, 1)
+    // Save cart to localStorage
+    saveCart() {
+      try {
+        const cartData = {
+          items: this.items,
+          selectedShipping: this.selectedShipping,
+          appliedCoupon: this.appliedCoupon
+        }
+        localStorage.setItem('ecogear_cart', JSON.stringify(cartData))
+      } catch (error) {
+        console.error('Error saving cart to localStorage:', error)
       }
     },
 
@@ -174,8 +153,11 @@ export const useCartStore = defineStore('cart', {
       
       if (existingItem) {
         const newQuantity = existingItem.quantity + quantity
-        if (newQuantity <= existingItem.maxQuantity) {
+        const maxQuantity = product.maxQuantity || 10
+        if (newQuantity <= maxQuantity) {
           existingItem.quantity = newQuantity
+        } else {
+          existingItem.quantity = maxQuantity
         }
       } else {
         this.items.push({
@@ -187,9 +169,34 @@ export const useCartStore = defineStore('cart', {
           image: product.image,
           brand: product.brand,
           quantity: quantity,
-          inStock: product.inStock,
+          inStock: product.inStock !== false, // Default to true if not specified
           maxQuantity: product.maxQuantity || 10
         })
+      }
+      
+      // Save to localStorage after adding
+      this.saveCart()
+    },
+
+    // Update item quantity
+    updateQuantity(itemId, newQuantity) {
+      const item = this.items.find(item => item.id === itemId)
+      if (item) {
+        if (newQuantity <= 0) {
+          this.removeItem(itemId)
+        } else if (newQuantity <= item.maxQuantity) {
+          item.quantity = newQuantity
+          this.saveCart()
+        }
+      }
+    },
+
+    // Remove item from cart
+    removeItem(itemId) {
+      const index = this.items.findIndex(item => item.id === itemId)
+      if (index !== -1) {
+        this.items.splice(index, 1)
+        this.saveCart()
       }
     },
 
@@ -198,9 +205,10 @@ export const useCartStore = defineStore('cart', {
       const coupon = this.availableCoupons.find(c => c.code.toLowerCase() === code.toLowerCase())
       if (coupon && this.subtotal >= coupon.minAmount) {
         this.appliedCoupon = code.toUpperCase()
+        this.saveCart()
         return { success: true, message: `Coupon ${code} applied successfully!` }
       } else if (coupon && this.subtotal < coupon.minAmount) {
-        return { success: false, message: `Minimum order amount of $${coupon.minAmount} required for this coupon.` }
+        return { success: false, message: `Minimum order amount of RM${coupon.minAmount} required for this coupon.` }
       } else {
         return { success: false, message: 'Invalid coupon code.' }
       }
@@ -209,6 +217,7 @@ export const useCartStore = defineStore('cart', {
     // Remove coupon
     removeCoupon() {
       this.appliedCoupon = null
+      this.saveCart()
     },
 
     // Update shipping method
@@ -216,14 +225,21 @@ export const useCartStore = defineStore('cart', {
       const shipping = this.shippingOptions.find(option => option.id === shippingId)
       if (shipping) {
         this.selectedShipping = shippingId
+        this.saveCart()
       }
     },
 
-    // Clear cart
+    // Clear cart completely
     clearCart() {
       this.items = []
       this.appliedCoupon = null
       this.selectedShipping = 'standard'
+      this.saveCart()
+    },
+
+    // Show loading state (for UI feedback)
+    setLoading(loading) {
+      this.isLoading = loading
     }
   }
 })
