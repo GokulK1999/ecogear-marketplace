@@ -155,7 +155,13 @@
             <div class="testimonial-card card h-100">
               <div class="card-body text-center p-3 p-md-4">
                 <div class="testimonial-avatar mb-2 mb-md-3">
-                  <i class="bi bi-person-circle testimonial-avatar-size text-muted"></i>
+                  <img 
+                    :src="testimonial.avatar" 
+                    :alt="testimonial.name"
+                    class="testimonial-avatar-image rounded-circle"
+                    @error="$event.target.style.display='none'; $event.target.nextElementSibling.style.display='inline-block'"
+                  >
+                  <i class="bi bi-person-circle testimonial-avatar-size text-muted" style="display: none;"></i>
                 </div>
                 <blockquote class="blockquote mb-2 mb-md-3">
                   <p class="mb-0 testimonial-text">"{{ testimonial.review }}"</p>
@@ -240,21 +246,24 @@ export default {
           name: 'Sarah Johnson',
           location: 'Colorado, USA',
           rating: 5,
-          review: 'Amazing quality gear that actually helps the environment. My EcoTent has survived multiple camping trips!'
+          review: 'Amazing quality gear that actually helps the environment. My EcoTent has survived multiple camping trips!',
+          avatar: '/src/assets/images/sarah-johnson.jpg'
         },
         {
           id: 2,
           name: 'Mike Chen',
           location: 'British Columbia, Canada',
           rating: 5,
-          review: 'The solar backpack is a game-changer for long hiking trips. Never worried about phone battery again.'
+          review: 'The solar backpack is a game-changer for long hiking trips. Never worried about phone battery again.',
+          avatar: '/src/assets/images/mike-chen.jpg'
         },
         {
           id: 3,
           name: 'Emma Rodriguez',
           location: 'California, USA',
           rating: 5,
-          review: 'Love supporting a company that cares about sustainability. Great products, great mission!'
+          review: 'Love supporting a company that cares about sustainability. Great products, great mission!',
+          avatar: '/src/assets/images/emma-rodriguez.jpg'
         }
       ]
     }
@@ -426,6 +435,25 @@ export default {
 
 .testimonial-location {
   font-size: 0.85rem;
+}
+
+.testimonial-avatar-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border: 3px solid #e9ecef;
+  transition: transform 0.3s ease;
+}
+
+.testimonial-avatar-image:hover {
+  transform: scale(1.05);
+}
+
+@media (min-width: 768px) {
+  .testimonial-avatar-image {
+    width: 100px;
+    height: 100px;
+  }
 }
 
 /* Tablet Styles (768px+) */

@@ -23,9 +23,9 @@ try {
     // Connect to database
     $conn = getDbConnection();
     
-    // Get user profile
+    // Get user profile - ADDED profile_picture field
     $query = "SELECT id, first_name, last_name, email, phone, date_of_birth, 
-                     address, city, state, postal_code, gender,
+                     address, city, state, postal_code, gender, profile_picture,
                      email_notifications, sms_notifications, newsletter,
                      profile_visible, share_activity, data_saving, created_at
               FROM users WHERE id = :user_id";

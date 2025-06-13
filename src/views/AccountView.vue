@@ -30,7 +30,7 @@
           <div class="profile-sidebar">
             
             <!-- Profile Card -->
-            <div class="card shadow-sm mb-4" :class="{ 'loading': isLoading }">
+            <div class="card shadow-sm mb-4 stable-card" :class="{ 'loading': isLoading }">
               <div class="card-body text-center p-4">
                 <!-- Loading Skeleton -->
                 <div v-if="isLoading" class="loading-skeleton">
@@ -42,28 +42,30 @@
                   </div>
                   
                   <!-- User Info Skeleton -->
-                  <div class="skeleton-text skeleton-name mb-2"></div>
-                  <div class="skeleton-text skeleton-email mb-2"></div>
-                  
-                  <!-- Badges Skeleton -->
-                  <div class="user-badges mb-3">
-                    <span class="skeleton-badge me-1"></span>
-                    <span class="skeleton-badge"></span>
+                  <div class="user-info-section">
+                    <div class="skeleton-text skeleton-name mb-1"></div>
+                    <div class="skeleton-text skeleton-email mb-2"></div>
+                    
+                    <!-- Badges Skeleton -->
+                    <div class="user-badges mb-3">
+                      <span class="skeleton-badge me-1"></span>
+                      <span class="skeleton-badge"></span>
+                    </div>
                   </div>
                   
                   <!-- Stats Skeleton -->
-                  <div class="account-stats mt-3">
+                  <div class="account-stats mt-3 pt-3">
                     <div class="row g-3 text-center">
                       <div class="col-4">
-                        <div class="skeleton-text skeleton-stat"></div>
+                        <div class="skeleton-text skeleton-stat mb-2"></div>
                         <div class="skeleton-text skeleton-label"></div>
                       </div>
                       <div class="col-4">
-                        <div class="skeleton-text skeleton-stat"></div>
+                        <div class="skeleton-text skeleton-stat mb-2"></div>
                         <div class="skeleton-text skeleton-label"></div>
                       </div>
                       <div class="col-4">
-                        <div class="skeleton-text skeleton-stat"></div>
+                        <div class="skeleton-text skeleton-stat mb-2"></div>
                         <div class="skeleton-text skeleton-label"></div>
                       </div>
                     </div>
@@ -71,7 +73,7 @@
                 </div>
 
                 <!-- Actual Content -->
-                <div v-else>
+                <div v-else class="actual-content">
                   <!-- Profile Picture -->
                   <div class="profile-picture mb-3">
                     <div class="avatar-container position-relative">
@@ -96,21 +98,23 @@
                   </div>
                   
                   <!-- User Info -->
-                  <h4 class="fw-bold text-dark mb-1">
-                    {{ displayName }}
-                  </h4>
-                  <p class="text-muted mb-2">{{ userProfile.email || 'Loading...' }}</p>
-                  <div class="user-badges">
-                    <span class="badge bg-success me-1">
-                      <i class="bi bi-shield-check me-1"></i>Verified
-                    </span>
-                    <span class="badge bg-primary">
-                      <i class="bi bi-leaf me-1"></i>Eco Warrior
-                    </span>
+                  <div class="user-info-section">
+                    <h4 class="fw-bold text-dark mb-1 user-name">
+                      {{ displayName }}
+                    </h4>
+                    <p class="text-muted mb-2 user-email">{{ userProfile.email || 'Loading...' }}</p>
+                    <div class="user-badges mb-3">
+                      <span class="badge bg-success me-1">
+                        <i class="bi bi-shield-check me-1"></i>Verified
+                      </span>
+                      <span class="badge bg-primary">
+                        <i class="bi bi-leaf me-1"></i>Eco Warrior
+                      </span>
+                    </div>
                   </div>
                   
                   <!-- Account Stats -->
-                  <div class="account-stats mt-3">
+                  <div class="account-stats mt-3 pt-3">
                     <div class="row g-3 text-center">
                       <div class="col-4">
                         <div class="stat-item">
@@ -120,7 +124,7 @@
                       </div>
                       <div class="col-4">
                         <div class="stat-item">
-                          <div class="stat-number fw-bold text-info">{{ userStats.totalSpent }}</div>
+                          <div class="stat-number fw-bold text-info">RM{{ userStats.totalSpent }}</div>
                           <div class="stat-label small text-muted">Spent</div>
                         </div>
                       </div>
@@ -467,19 +471,37 @@
         </div>
       </div>
     </div>
+
+    <!-- Toast Notifications -->
+    <ToastNotification
+      :show="toast.show"
+      :message="toast.message"
+      :type="toast.type"
+      @hide="hideToast"
+    />
   </div>
 </template>
 
 <script>
+import { useOrdersStore } from '@/stores/ordersStore'
+import ToastNotification from '@/components/ToastNotification.vue'
+
 export default {
   name: 'AccountView',
+  components: {
+    ToastNotification
+  },
+  setup() {
+    const ordersStore = useOrdersStore()
+    return { ordersStore }
+  },
   data() {
     return {
       isEditMode: false,
       isUploadingImage: false,
-      isLoading: true, // ADD LOADING STATE
+      isLoading: true,
       
-      // User profile data - START WITH EMPTY DATA
+      // User profile data
       userProfile: {
         firstName: '',
         lastName: '',
@@ -502,10 +524,10 @@ export default {
         }
       },
       
-      // User statistics
+      // User statistics - will be calculated from localStorage orders
       userStats: {
         totalOrders: 0,
-        totalSpent: 'RM0',
+        totalSpent: '0.00',
         ecoPoints: 0
       },
       
@@ -514,7 +536,14 @@ export default {
         'Johor', 'Kedah', 'Kelantan', 'Kuala Lumpur', 'Labuan', 'Malacca', 
         'Negeri Sembilan', 'Pahang', 'Penang', 'Perak', 'Perlis', 'Putrajaya',
         'Sabah', 'Sarawak', 'Selangor', 'Terengganu'
-      ]
+      ],
+
+      // Toast notification
+      toast: {
+        show: false,
+        message: '',
+        type: 'success'
+      }
     }
   },
   
@@ -541,6 +570,37 @@ export default {
   },
   
   methods: {
+    // Calculate user statistics from localStorage orders
+    calculateUserStats() {
+      // Initialize orders store
+      this.ordersStore.initializeOrders()
+      
+      // Get user orders
+      const userOrders = this.ordersStore.userOrders
+      
+      // Calculate statistics
+      const totalOrders = userOrders.length
+      const totalSpent = userOrders.reduce((sum, order) => sum + parseFloat(order.total || 0), 0)
+      
+      // Calculate eco points (1 point per RM spent, bonus for delivered orders)
+      let ecoPoints = Math.floor(totalSpent)
+      userOrders.forEach(order => {
+        if (order.status === 'delivered') {
+          ecoPoints += 10 // Bonus points for completed orders
+        }
+      })
+      
+      // Update stats
+      this.userStats = {
+        totalOrders,
+        totalSpent: totalSpent.toFixed(2),
+        ecoPoints
+      }
+      
+      console.log('Calculated user stats:', this.userStats)
+      console.log('From orders:', userOrders)
+    },
+    
     // Toggle edit mode
     toggleEditMode() {
       if (this.isEditMode) {
@@ -554,10 +614,10 @@ export default {
     async saveProfile() {
       try {
         await this.simulateProfileUpdate()
-        alert('Profile updated successfully!')
+        this.showToast('Profile updated successfully!', 'success')
         this.isEditMode = false
       } catch (error) {
-        alert('Failed to update profile. Please try again.')
+        this.showToast('Failed to update profile. Please try again.', 'error')
         console.error('Profile update error:', error)
       }
     },
@@ -656,13 +716,16 @@ export default {
           }
           
           console.log('Profile loaded successfully:', this.userProfile)
+          
+          // Calculate user statistics after profile is loaded
+          this.calculateUserStats()
         } else {
           console.error('Failed to load profile:', result.message)
-          alert('Failed to load profile data')
+          this.showToast('Failed to load profile data', 'error')
         }
       } catch (error) {
         console.error('Profile loading error:', error)
-        alert('Error loading profile data')
+        this.showToast('Error loading profile data', 'error')
       } finally {
         this.isLoading = false
       }
@@ -689,7 +752,7 @@ export default {
         
       } catch (error) {
         console.error('Error opening file picker:', error)
-        alert('Error opening file picker')
+        this.showToast('Error opening file picker', 'error')
       }
     },
     
@@ -698,13 +761,13 @@ export default {
       try {
         const maxSize = 5 * 1024 * 1024 // 5MB
         if (file.size > maxSize) {
-          alert('File size too large. Maximum size is 5MB.')
+          this.showToast('File size too large. Maximum size is 5MB.', 'warning')
           return
         }
         
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
         if (!allowedTypes.includes(file.type)) {
-          alert('Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed.')
+          this.showToast('Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed.', 'warning')
           return
         }
         
@@ -730,34 +793,34 @@ export default {
         
         if (result.success) {
           this.userProfile.profilePicture = result.data.image_path
-          alert('Profile picture updated successfully!')
+          this.showToast('Profile picture updated successfully!', 'success')
         } else {
           throw new Error(result.message)
         }
         
       } catch (error) {
         console.error('Image upload error:', error)
-        alert(`Failed to upload image: ${error.message}`)
+        this.showToast(`Failed to upload image: ${error.message}`, 'error')
       } finally {
         this.isUploadingImage = false
       }
     },
     
     changePassword() {
-      alert('Password change functionality would be implemented here')
+      this.showToast('Password change functionality would be implemented here', 'info')
     },
     
     manage2FA() {
-      alert('Two-factor authentication management would be implemented here')
+      this.showToast('Two-factor authentication management would be implemented here', 'info')
     },
     
     downloadData() {
-      alert('Data download functionality would be implemented here')
+      this.showToast('Data download functionality would be implemented here', 'info')
     },
     
     deleteAccount() {
       if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-        alert('Account deletion functionality would be implemented here')
+        this.showToast('Account deletion functionality would be implemented here', 'warning')
       }
     },
     
@@ -769,6 +832,20 @@ export default {
         '': 'Prefer not to say'
       }
       return genderMap[gender] || 'Prefer not to say'
+    },
+
+    // Show toast notification
+    showToast(message, type = 'success') {
+      this.toast = {
+        show: true,
+        message,
+        type
+      }
+    },
+
+    // Hide toast notification
+    hideToast() {
+      this.toast.show = false
     }
   },
   
@@ -871,11 +948,105 @@ export default {
   box-shadow: 0 4px 12px rgba(45, 80, 22, 0.3);
 }
 
-/* Loading Skeleton Styles */
+/* FIXED LOADING SKELETON STYLES - NO MORE FLUCTUATION */
+.stable-card {
+  min-height: 420px; /* Fixed height to prevent fluctuation */
+}
+
+.stable-card .card-body {
+  position: relative;
+  height: 100%;
+}
+
+.loading-skeleton,
+.actual-content {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .loading-skeleton {
   animation: none; /* Disable card animation during loading */
 }
 
+/* Profile picture section - consistent sizing */
+.profile-picture {
+  height: 144px; /* Fixed height: 120px avatar + 24px margin */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* User info section - consistent sizing */
+.user-info-section {
+  height: 100px; /* Fixed height for name, email, badges */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-name {
+  height: 32px; /* Fixed height for h4 */
+  display: flex;
+  align-items: center;
+  line-height: 1.2;
+  margin-bottom: 0.25rem !important;
+}
+
+.user-email {
+  height: 24px; /* Fixed height for email */
+  display: flex;
+  align-items: center;
+  line-height: 1.2;
+  margin-bottom: 0.5rem !important;
+}
+
+.user-badges {
+  height: 28px; /* Fixed height for badges */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem !important;
+}
+
+/* Account stats section - consistent sizing */
+.account-stats {
+  border-top: 1px solid #e9ecef;
+  padding-top: 1rem;
+  height: 100px; /* Fixed height */
+  margin-top: auto; /* Push to bottom */
+}
+
+.stat-item {
+  height: 60px; /* Fixed height for stat items */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-number {
+  font-size: 1.2rem;
+  height: 28px; /* Fixed height */
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.stat-label {
+  height: 20px; /* Fixed height */
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
+
+/* Skeleton elements with exact same dimensions */
 .skeleton-avatar {
   width: 120px;
   height: 120px;
@@ -886,22 +1057,22 @@ export default {
 }
 
 .skeleton-text {
-  height: 16px;
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
   animation: skeleton-loading 1.5s infinite;
   border-radius: 4px;
-  margin: 0 auto;
 }
 
 .skeleton-name {
-  height: 24px;
+  height: 32px; /* Match user-name height */
   width: 180px;
+  margin-bottom: 0.25rem !important;
 }
 
 .skeleton-email {
-  height: 16px;
+  height: 24px; /* Match user-email height */
   width: 220px;
+  margin-bottom: 0.5rem !important;
 }
 
 .skeleton-badge {
@@ -912,16 +1083,18 @@ export default {
   background-size: 200% 100%;
   animation: skeleton-loading 1.5s infinite;
   border-radius: 12px;
+  margin-right: 0.25rem;
 }
 
 .skeleton-stat {
-  height: 20px;
+  height: 28px; /* Match stat-number height */
   width: 40px;
-  margin: 0 auto 8px;
+  margin: 0 auto;
+  margin-bottom: 8px;
 }
 
 .skeleton-label {
-  height: 14px;
+  height: 20px; /* Match stat-label height */
   width: 50px;
   margin: 0 auto;
 }
@@ -957,14 +1130,22 @@ export default {
     margin-bottom: 2rem;
   }
   
-  .avatar {
+  .avatar, .skeleton-avatar {
     width: 100px;
     height: 100px;
   }
+  
+  .stable-card {
+    min-height: 380px; /* Slightly smaller for mobile */
+  }
+  
+  .profile-picture {
+    height: 124px; /* Adjusted for smaller avatar */
+  }
 }
 
-/* Animation */
-.card {
+/* Animation for main content cards only */
+.col-lg-8 .card {
   animation: fadeInUp 0.4s ease-out;
 }
 
