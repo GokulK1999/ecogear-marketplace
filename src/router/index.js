@@ -48,7 +48,18 @@ const router = createRouter({
       component: () => import('../views/PurchasesView.vue'),
       meta: { title: 'My Purchases - EcoGear' }
     }
-  ]
+  ],
+  
+  // Scroll behavior - this fixes the scroll position issue
+  scrollBehavior(to, from, savedPosition) {
+    // If the user used browser back/forward buttons, restore their scroll position
+    if (savedPosition) {
+      return savedPosition
+    }
+    
+    // For all other navigation, scroll to top of page
+    return { top: 0, behavior: 'smooth' }
+  }
 })
 
 // Update page title on route change

@@ -1,25 +1,25 @@
 <template>
   <div class="home-page">
-    <!-- Hero Section - Demonstrates Grid System -->
+    <!-- Hero Section - Mobile Optimized -->
     <section class="hero-section">
       <div class="container">
-        <div class="row align-items-center min-vh-75">
+        <div class="row align-items-center min-vh-mobile">
           <div class="col-lg-6 col-md-8 col-sm-12">
             <div class="hero-content fade-in">
-              <h1 class="display-4 fw-bold text-white mb-4">
+              <h1 class="hero-title fw-bold text-white mb-3 mb-md-4">
                 Gear Up for 
                 <span class="text-warning">Sustainable</span> 
                 Adventures
               </h1>
-              <p class="lead text-white mb-4">
+              <p class="hero-subtitle text-white mb-3 mb-md-4">
                 Discover premium outdoor equipment that doesn't compromise on performance or our planet. 
                 From eco-friendly tents to solar-powered gadgets, we've got everything for your next adventure.
               </p>
               <div class="hero-buttons">
-                <router-link to="/products" class="btn btn-eco-primary btn-lg me-3 mb-2">
+                <router-link to="/products" class="btn btn-eco-primary btn-lg btn-mobile me-2 me-md-3 mb-2 mb-md-2">
                   <i class="bi bi-compass me-2"></i>Shop Now
                 </router-link>
-                <button class="btn btn-outline-light btn-lg mb-2">
+                <button class="btn btn-outline-light btn-lg btn-mobile mb-2 mb-md-2">
                   <i class="bi bi-play-circle me-2"></i>Learn More
                 </button>
               </div>
@@ -34,27 +34,27 @@
       </div>
     </section>
 
-    <!-- Category Navigation - Grid System -->
-    <section class="categories-section py-5 bg-light">
+    <!-- Category Navigation - Mobile Optimized -->
+    <section class="categories-section py-4 py-md-5 bg-light">
       <div class="container">
-        <div class="row mb-5">
+        <div class="row mb-4 mb-md-5">
           <div class="col-12 text-center">
-            <h2 class="display-6 fw-bold text-dark mb-3">Shop by Category</h2>
-            <p class="lead text-muted">Sustainable gear for every outdoor adventure</p>
+            <h2 class="section-title fw-bold text-dark mb-2 mb-md-3">Shop by Category</h2>
+            <p class="section-subtitle text-muted">Sustainable gear for every outdoor adventure</p>
           </div>
         </div>
         
-        <!-- Category Grid - Demonstrates Row-Column System -->
-        <div class="row g-4">
-          <div class="col-lg-3 col-md-6 col-sm-6 col-12" v-for="category in categories" :key="category.id">
+        <!-- Category Grid - Mobile First -->
+        <div class="row g-3 g-md-4">
+          <div class="col-6 col-md-6 col-lg-3" v-for="category in categories" :key="category.id">
             <div class="category-card card h-100 text-center">
-              <div class="card-body p-4">
-                <div class="category-icon mb-3">
-                  <i :class="category.icon" class="display-4 text-success"></i>
+              <div class="card-body p-3 p-md-4">
+                <div class="category-icon mb-2 mb-md-3">
+                  <i :class="category.icon" class="category-icon-size text-success"></i>
                 </div>
-                <h5 class="card-title fw-bold">{{ category.name }}</h5>
-                <p class="card-text text-muted">{{ category.description }}</p>
-                <router-link to="/products" class="btn btn-eco-secondary">
+                <h5 class="card-title fw-bold category-title">{{ category.name }}</h5>
+                <p class="card-text text-muted category-description d-none d-md-block">{{ category.description }}</p>
+                <router-link to="/products" class="btn btn-eco-secondary btn-mobile">
                   Explore <i class="bi bi-arrow-right ms-1"></i>
                 </router-link>
               </div>
@@ -64,34 +64,36 @@
       </div>
     </section>
 
-    <!-- Featured Products - Grid System -->
-    <section class="featured-products py-5">
+    <!-- Featured Products - Mobile Optimized -->
+    <section class="featured-products py-4 py-md-5">
       <div class="container">
-        <div class="row mb-5">
+        <div class="row mb-4 mb-md-5">
           <div class="col-12 text-center">
-            <h2 class="display-6 fw-bold text-dark mb-3">Featured Products</h2>
-            <p class="lead text-muted">Our most popular sustainable gear</p>
+            <h2 class="section-title fw-bold text-dark mb-2 mb-md-3">Featured Products</h2>
+            <p class="section-subtitle text-muted">Our most popular sustainable gear</p>
           </div>
         </div>
         
-        <!-- Products Grid -->
-        <div class="row g-4">
-          <div class="col-lg-4 col-md-6 col-12" v-for="product in featuredProducts" :key="product.id">
+        <!-- Products Grid - Mobile Optimized -->
+        <div class="row g-3 g-md-4">
+          <div class="col-12 col-md-6 col-lg-4" v-for="product in featuredProducts" :key="product.id">
             <div class="product-card card h-100">
-              <img :src="product.image" :alt="product.name" class="card-img-top">
-              <div class="card-body d-flex flex-column">
+              <div class="product-image-container">
+                <img :src="product.image" :alt="product.name" class="card-img-top product-image">
+              </div>
+              <div class="card-body d-flex flex-column p-3 p-md-4">
                 <div class="mb-auto">
-                  <h5 class="card-title fw-bold">{{ product.name }}</h5>
-                  <p class="card-text text-muted">{{ product.description }}</p>
+                  <h5 class="card-title fw-bold product-title">{{ product.name }}</h5>
+                  <p class="card-text text-muted product-description">{{ product.description }}</p>
                 </div>
                 <div class="product-footer mt-3">
                   <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="h5 text-success fw-bold mb-0">RM{{ formatPrice(product.price) }}</span>
-                    <div class="eco-badge">
+                    <span class="product-price text-success fw-bold mb-0">RM{{ formatPrice(product.price) }}</span>
+                    <div class="eco-badge d-none d-sm-block">
                       <span class="badge bg-success"><i class="bi bi-leaf me-1"></i>Eco-Friendly</span>
                     </div>
                   </div>
-                  <router-link to="/products" class="btn btn-eco-primary w-100">
+                  <router-link to="/products" class="btn btn-eco-primary w-100 btn-mobile">
                     <i class="bi bi-cart-plus me-2"></i>View Details
                   </router-link>
                 </div>
@@ -102,31 +104,31 @@
       </div>
     </section>
 
-    <!-- Newsletter Section - Grid System -->
-    <section class="newsletter-section py-5 bg-dark text-white">
+    <!-- Newsletter Section - Mobile Optimized -->
+    <section class="newsletter-section py-4 py-md-5 bg-dark text-white">
       <div class="container">
         <div class="row justify-content-center">
-          <div class="col-lg-8 col-md-10 col-12 text-center">
-            <h2 class="display-6 fw-bold mb-3">
-              <i class="bi bi-envelope-heart text-success me-3"></i>
+          <div class="col-12 col-md-10 col-lg-8 text-center">
+            <h2 class="section-title fw-bold mb-3">
+              <i class="bi bi-envelope-heart text-success me-2 me-md-3"></i>
               Stay Updated
             </h2>
-            <p class="lead mb-4">
+            <p class="section-subtitle mb-3 mb-md-4">
               Get the latest sustainable gear updates and eco-friendly adventure tips delivered to your inbox.
             </p>
             <form class="newsletter-form" @submit.prevent="subscribeNewsletter">
-              <div class="row g-3 justify-content-center">
-                <div class="col-md-8 col-12">
+              <div class="row g-2 g-md-3 justify-content-center">
+                <div class="col-12 col-md-8">
                   <input 
                     type="email" 
-                    class="form-control form-control-lg" 
+                    class="form-control form-control-lg newsletter-input" 
                     placeholder="Enter your email address"
                     v-model="newsletterEmail"
                     required
                   >
                 </div>
-                <div class="col-md-4 col-12">
-                  <button type="submit" class="btn btn-success btn-lg w-100">
+                <div class="col-12 col-md-4">
+                  <button type="submit" class="btn btn-success btn-lg w-100 btn-mobile">
                     <i class="bi bi-send me-2"></i>Subscribe
                   </button>
                 </div>
@@ -137,32 +139,33 @@
       </div>
     </section>
 
-    <!-- Testimonials - Grid System -->
-    <section class="testimonials-section py-5 bg-light">
+    <!-- Testimonials - Mobile Optimized -->
+    <section class="testimonials-section py-4 py-md-5 bg-light">
       <div class="container">
-        <div class="row mb-5">
+        <div class="row mb-4 mb-md-5">
           <div class="col-12 text-center">
-            <h2 class="display-6 fw-bold text-dark mb-3">What Adventurers Say</h2>
-            <p class="lead text-muted">Real reviews from sustainable outdoor enthusiasts</p>
+            <h2 class="section-title fw-bold text-dark mb-2 mb-md-3">What Adventurers Say</h2>
+            <p class="section-subtitle text-muted">Real reviews from sustainable outdoor enthusiasts</p>
           </div>
         </div>
         
-        <div class="row g-4">
-          <div class="col-lg-4 col-md-6 col-12" v-for="testimonial in testimonials" :key="testimonial.id">
+        <!-- Testimonials Grid - Mobile Optimized -->
+        <div class="row g-3 g-md-4">
+          <div class="col-12 col-md-6 col-lg-4" v-for="testimonial in testimonials" :key="testimonial.id">
             <div class="testimonial-card card h-100">
-              <div class="card-body text-center p-4">
-                <div class="testimonial-avatar mb-3">
-                  <i class="bi bi-person-circle display-4 text-muted"></i>
+              <div class="card-body text-center p-3 p-md-4">
+                <div class="testimonial-avatar mb-2 mb-md-3">
+                  <i class="bi bi-person-circle testimonial-avatar-size text-muted"></i>
                 </div>
-                <blockquote class="blockquote mb-3">
-                  <p class="mb-0">"{{ testimonial.review }}"</p>
+                <blockquote class="blockquote mb-2 mb-md-3">
+                  <p class="mb-0 testimonial-text">"{{ testimonial.review }}"</p>
                 </blockquote>
                 <div class="testimonial-rating mb-2">
-                  <i class="bi bi-star-fill text-warning" v-for="star in testimonial.rating" :key="star"></i>
+                  <i class="bi bi-star-fill text-warning testimonial-star" v-for="star in testimonial.rating" :key="star"></i>
                 </div>
                 <footer class="blockquote-footer">
-                  <strong>{{ testimonial.name }}</strong>
-                  <cite class="text-muted">{{ testimonial.location }}</cite>
+                  <strong class="testimonial-name">{{ testimonial.name }}</strong>
+                  <cite class="text-muted d-block d-sm-inline testimonial-location">{{ testimonial.location }}</cite>
                 </footer>
               </div>
             </div>
@@ -275,41 +278,315 @@ export default {
 </script>
 
 <style scoped>
-/* Component-specific styles */
-.min-vh-75 {
-  min-height: 75vh;
+/* Mobile-First Responsive Design */
+
+/* Base Mobile Styles (320px+) */
+.min-vh-mobile {
+  min-height: 60vh;
 }
 
+/* Hero Section - Mobile Optimized */
+.hero-title {
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.hero-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.btn-mobile {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+}
+
+.hero-image img {
+  max-height: 300px;
+  object-fit: cover;
+  width: 100%;
+}
+
+/* Section Titles - Mobile Optimized */
+.section-title {
+  font-size: 1.75rem;
+}
+
+.section-subtitle {
+  font-size: 0.95rem;
+}
+
+/* Category Cards - Mobile Optimized */
 .category-card {
   transition: all 0.3s ease;
   border: none;
   box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+  border-radius: 1rem;
 }
 
 .category-card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-5px);
   box-shadow: 0 8px 30px rgba(0,0,0,0.15);
 }
 
-.hero-image img {
-  max-height: 400px;
-  object-fit: cover;
+.category-icon-size {
+  font-size: 2.5rem;
 }
 
+.category-title {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.category-description {
+  font-size: 0.85rem;
+}
+
+/* Product Cards - Mobile Optimized */
+.product-card {
+  border: none;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.product-image-container {
+  height: 200px;
+  overflow: hidden;
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+.product-title {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.product-description {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.product-price {
+  font-size: 1.25rem;
+}
+
+/* Newsletter Section - Mobile Optimized */
+.newsletter-input {
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+/* Testimonials - Mobile Optimized */
 .testimonial-card {
   border: none;
   box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+  border-radius: 1rem;
 }
 
-@media (max-width: 768px) {
-  .hero-buttons .btn {
-    display: block;
-    width: 100%;
-    margin-bottom: 0.5rem;
+.testimonial-avatar-size {
+  font-size: 2.5rem;
+}
+
+.testimonial-text {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.testimonial-star {
+  font-size: 0.9rem;
+}
+
+.testimonial-name {
+  font-size: 0.95rem;
+}
+
+.testimonial-location {
+  font-size: 0.85rem;
+}
+
+/* Tablet Styles (768px+) */
+@media (min-width: 768px) {
+  .min-vh-mobile {
+    min-height: 70vh;
   }
   
-  .display-4 {
+  .hero-title {
     font-size: 2.5rem;
   }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .hero-buttons {
+    flex-direction: row;
+    gap: 1rem;
+  }
+  
+  .section-title {
+    font-size: 2.25rem;
+  }
+  
+  .section-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .category-icon-size {
+    font-size: 3rem;
+  }
+  
+  .category-title {
+    font-size: 1.1rem;
+  }
+  
+  .product-image-container {
+    height: 250px;
+  }
+  
+  .product-title {
+    font-size: 1.25rem;
+  }
+  
+  .product-description {
+    font-size: 1rem;
+  }
+  
+  .testimonial-avatar-size {
+    font-size: 3rem;
+  }
+  
+  .testimonial-text {
+    font-size: 1rem;
+  }
+  
+  .hero-image img {
+    max-height: 400px;
+  }
+}
+
+/* Desktop Styles (1024px+) */
+@media (min-width: 1024px) {
+  .min-vh-mobile {
+    min-height: 75vh;
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.25rem;
+  }
+  
+  .section-title {
+    font-size: 2.5rem;
+  }
+  
+  .section-subtitle {
+    font-size: 1.25rem;
+  }
+  
+  .category-icon-size {
+    font-size: 3.5rem;
+  }
+  
+  .category-title {
+    font-size: 1.25rem;
+  }
+  
+  .product-image-container {
+    height: 280px;
+  }
+  
+  .testimonial-avatar-size {
+    font-size: 3.5rem;
+  }
+}
+
+/* Touch Optimization */
+@media (hover: none) and (pointer: coarse) {
+  .btn-mobile {
+    min-height: 48px;
+    padding: 0.875rem 2rem;
+  }
+  
+  .category-card:hover {
+    transform: none;
+  }
+  
+  .product-card:hover {
+    transform: none;
+  }
+  
+  .product-card:hover .product-image {
+    transform: none;
+  }
+}
+
+/* High-resolution displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .hero-image img,
+  .product-image {
+    image-rendering: -webkit-optimize-contrast;
+  }
+}
+
+/* Landscape phone optimization */
+@media (max-height: 500px) and (orientation: landscape) {
+  .min-vh-mobile {
+    min-height: 90vh;
+  }
+  
+  .py-4 {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+}
+
+/* Animation for mobile */
+.fade-in {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Focus states for accessibility */
+.btn:focus,
+.form-control:focus {
+  box-shadow: 0 0 0 0.2rem rgba(45, 80, 22, 0.25);
+  border-color: var(--eco-primary);
 }
 </style>

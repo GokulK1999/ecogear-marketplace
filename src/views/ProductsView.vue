@@ -1,16 +1,16 @@
 <template>
   <div class="products-page">
     <!-- Page Header -->
-    <section class="page-header bg-light py-4">
+    <section class="page-header bg-light py-3 py-md-4">
       <div class="container">
         <div class="row align-items-center">
           <div class="col-md-8">
-            <h1 class="display-5 fw-bold text-dark mb-2">Sustainable Outdoor Gear</h1>
-            <p class="lead text-muted mb-0">
+            <h1 class="page-title fw-bold text-dark mb-2">Sustainable Outdoor Gear</h1>
+            <p class="page-subtitle text-muted mb-0">
               Discover {{ filteredProducts.length }} eco-friendly products for your next adventure
             </p>
           </div>
-          <div class="col-md-4 text-md-end">
+          <div class="col-md-4 text-md-end d-none d-md-block">
             <nav aria-label="breadcrumb">
               <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item">
@@ -24,13 +24,27 @@
       </div>
     </section>
 
-    <div class="container py-4">
+    <div class="container py-3 py-md-4">
+      <!-- Mobile Filter Toggle -->
+      <div class="d-md-none mb-3">
+        <button 
+          class="btn btn-outline-primary w-100 filter-toggle" 
+          @click="showMobileFilters = !showMobileFilters"
+        >
+          <i class="bi bi-funnel me-2"></i>Filters & Search
+          <i :class="showMobileFilters ? 'bi bi-chevron-up' : 'bi bi-chevron-down'" class="ms-2"></i>
+        </button>
+      </div>
+
       <div class="row">
         <!-- Sidebar Filters -->
         <div class="col-lg-3 col-md-4 mb-4">
-          <div class="filters-sidebar sticky-top" style="top: 100px;">
+          <div 
+            class="filters-sidebar" 
+            :class="{'d-none d-md-block': !showMobileFilters}"
+          >
             
-            <!-- Category Filter - Demonstrates Selection -->
+            <!-- Category Filter -->
             <div class="filter-section mb-4">
               <h5 class="filter-title fw-bold mb-3">
                 <i class="bi bi-funnel text-success me-2"></i>Categories
@@ -130,14 +144,14 @@
           
           <!-- Search and Sort Bar -->
           <div class="products-controls mb-4">
-            <div class="row g-3 align-items-center">
+            <div class="row g-2 g-md-3 align-items-center">
               <!-- Search Input -->
-              <div class="col-md-6">
+              <div class="col-12 col-md-6">
                 <div class="search-box position-relative">
                   <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
                   <input 
                     type="text" 
-                    class="form-control ps-5" 
+                    class="form-control ps-5 search-input" 
                     placeholder="Search products..."
                     v-model="searchQuery"
                     @input="filterProducts"
@@ -146,9 +160,9 @@
               </div>
 
               <!-- Sort Dropdown -->
-              <div class="col-md-3">
+              <div class="col-12 col-md-3">
                 <select 
-                  class="form-select" 
+                  class="form-select sort-select" 
                   v-model="sortBy" 
                   @change="sortProducts"
                 >
@@ -161,19 +175,19 @@
               </div>
 
               <!-- Results Count -->
-              <div class="col-md-3 text-md-end">
-                <small class="text-muted">
+              <div class="col-12 col-md-3 text-center text-md-end">
+                <small class="text-muted results-count">
                   Showing {{ paginatedProducts.length }} of {{ filteredProducts.length }} products
                 </small>
               </div>
             </div>
           </div>
 
-          <!-- Products Grid - Demonstrates Repetition -->
+          <!-- Products Grid -->
           <div class="products-grid" v-if="paginatedProducts.length > 0">
-            <div class="row g-4">
+            <div class="row g-3 g-md-4">
               <div 
-                class="col-lg-4 col-md-6 col-sm-6 col-12" 
+                class="col-6 col-md-6 col-lg-4" 
                 v-for="product in paginatedProducts" 
                 :key="product.id"
               >
@@ -190,7 +204,7 @@
                     <!-- Stock Badge -->
                     <div class="position-absolute top-0 start-0 m-2">
                       <span 
-                        class="badge" 
+                        class="badge badge-mobile" 
                         :class="product.inStock ? 'bg-success' : 'bg-danger'"
                       >
                         {{ product.inStock ? 'In Stock' : 'Out of Stock' }}
@@ -198,8 +212,8 @@
                     </div>
 
                     <!-- Sustainability Badge -->
-                    <div class="position-absolute top-0 end-0 m-2">
-                      <span class="badge bg-primary">
+                    <div class="position-absolute top-0 end-0 m-2 d-none d-sm-block">
+                      <span class="badge bg-primary badge-mobile">
                         <i class="bi bi-leaf me-1"></i>{{ product.sustainability }}% Eco
                       </span>
                     </div>
@@ -208,13 +222,13 @@
                     <div class="product-overlay position-absolute w-100 h-100 d-flex align-items-center justify-content-center">
                       <div class="quick-actions">
                         <button 
-                          class="btn btn-eco-primary btn-sm me-2"
+                          class="btn btn-eco-primary btn-sm me-2 quick-action-btn"
                           @click="addToCart(product)"
                           :disabled="!product.inStock"
                         >
                           <i class="bi bi-cart-plus"></i>
                         </button>
-                        <button class="btn btn-outline-light btn-sm">
+                        <button class="btn btn-outline-light btn-sm quick-action-btn">
                           <i class="bi bi-eye"></i>
                         </button>
                       </div>
@@ -222,7 +236,7 @@
                   </div>
 
                   <!-- Product Info -->
-                  <div class="card-body d-flex flex-column">
+                  <div class="card-body d-flex flex-column p-3 p-md-4">
                     <!-- Brand and Category -->
                     <div class="product-meta mb-2">
                       <small class="text-muted">{{ product.brand }} • {{ getCategoryName(product.category) }}</small>
@@ -236,21 +250,21 @@
                       <div class="d-flex align-items-center">
                         <div class="stars me-2">
                           <i 
-                            class="bi" 
+                            class="bi star-icon" 
                             :class="i <= product.rating ? 'bi-star-fill text-warning' : 'bi-star text-muted'"
                             v-for="i in 5" 
                             :key="i"
                           ></i>
                         </div>
-                        <small class="text-muted">({{ product.reviews }} reviews)</small>
+                        <small class="text-muted review-count">({{ product.reviews }} reviews)</small>
                       </div>
                     </div>
 
                     <!-- Description -->
-                    <p class="card-text text-muted small mb-3">{{ product.description }}</p>
+                    <p class="card-text text-muted mb-3 product-description">{{ product.description }}</p>
 
                     <!-- Features -->
-                    <div class="product-features mb-3">
+                    <div class="product-features mb-3 d-none d-md-block">
                       <span 
                         class="badge bg-light text-dark me-1 mb-1" 
                         v-for="feature in product.features.slice(0, 2)" 
@@ -267,20 +281,21 @@
                           <span class="current-price h5 text-success fw-bold mb-0">
                             RM{{ formatPrice(product.price) }}
                           </span>
-                          <small class="original-price text-muted text-decoration-line-through ms-2" v-if="product.originalPrice > product.price">
+                          <small class="original-price text-muted text-decoration-line-through ms-2 d-none d-sm-inline" v-if="product.originalPrice > product.price">
                             RM{{ formatPrice(product.originalPrice) }}
                           </small>
                         </div>
-                        <small class="text-muted">{{ product.weight }}</small>
+                        <small class="text-muted product-weight d-none d-md-block">{{ product.weight }}</small>
                       </div>
 
                       <button 
-                        class="btn btn-eco-primary w-100"
+                        class="btn btn-eco-primary w-100 add-to-cart-btn"
                         @click="addToCart(product)"
                         :disabled="!product.inStock"
                       >
                         <i class="bi bi-cart-plus me-2"></i>
-                        {{ product.inStock ? 'Add to Cart' : 'Out of Stock' }}
+                        <span class="d-none d-sm-inline">{{ product.inStock ? 'Add to Cart' : 'Out of Stock' }}</span>
+                        <span class="d-sm-none">{{ product.inStock ? 'Add' : 'Out of Stock' }}</span>
                       </button>
                     </div>
                   </div>
@@ -299,8 +314,8 @@
             </button>
           </div>
 
-          <!-- Pagination - Demonstrates Pagination -->
-          <nav aria-label="Products pagination" v-if="totalPages > 1" class="mt-5">
+          <!-- Pagination -->
+          <nav aria-label="Products pagination" v-if="totalPages > 1" class="mt-4 mt-md-5">
             <ul class="pagination justify-content-center">
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
                 <button class="page-link" @click="changePage(currentPage - 1)" :disabled="currentPage === 1">
@@ -355,6 +370,9 @@ export default {
   },
   data() {
     return {
+      // Mobile state
+      showMobileFilters: false,
+      
       // Arrays - demonstrating use of arrays
       products: productsData.products,
       categories: productsData.categories,
@@ -537,7 +555,7 @@ export default {
       this.filterProducts()
     },
     
-    // Add to cart functionality - FIXED VERSION
+    // Add to cart functionality
     addToCart(product) {
       if (product.inStock) {
         try {
@@ -579,21 +597,40 @@ export default {
 </script>
 
 <style scoped>
-/* Product card styles */
+/* Mobile-First Responsive Design */
+
+/* Base Mobile Styles (320px+) */
+.page-title {
+  font-size: 1.75rem;
+}
+
+.page-subtitle {
+  font-size: 0.95rem;
+}
+
+.filter-toggle {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  min-height: 48px;
+}
+
+/* Product card styles - Mobile Optimized */
 .product-card {
   transition: all 0.3s ease;
   border: none;
   overflow: hidden;
+  border-radius: 1rem;
 }
 
 .product-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
 }
 
 .product-image {
   overflow: hidden;
-  height: 250px;
+  height: 160px;
 }
 
 .product-image img {
@@ -609,34 +646,107 @@ export default {
 
 .product-overlay {
   background: rgba(0,0,0,0.7);
-  opacity: 0;
+  opacity: 1;
   transition: all 0.3s ease;
 }
 
-.product-card:hover .product-overlay {
-  opacity: 1;
+.quick-action-btn {
+  min-height: 40px;
+  min-width: 40px;
+  border-radius: 50%;
 }
 
-/* Filter sidebar */
+/* Typography - Mobile Optimized */
+.card-title {
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.product-description {
+  font-size: 0.8rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+.current-price {
+  font-size: 1rem;
+}
+
+.product-meta {
+  font-size: 0.75rem;
+}
+
+.review-count {
+  font-size: 0.75rem;
+}
+
+/* Badges - Mobile Optimized */
+.badge-mobile {
+  font-size: 0.65rem;
+  padding: 0.25rem 0.4rem;
+}
+
+/* Buttons - Mobile Optimized */
+.add-to-cart-btn {
+  padding: 0.6rem 0.75rem;
+  font-size: 0.85rem;
+  min-height: 44px;
+  border-radius: 0.5rem;
+  font-weight: 600;
+}
+
+/* Filter sidebar - Mobile */
 .filters-sidebar {
   background: #f8f9fa;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  position: static !important;
 }
 
 .filter-title {
   color: var(--eco-primary);
   border-bottom: 2px solid var(--eco-secondary);
   padding-bottom: 0.5rem;
+  font-size: 1rem;
 }
 
-/* Search box */
+.filter-section {
+  margin-bottom: 1.5rem;
+}
+
+/* Search and Controls - Mobile */
+.search-input,
+.sort-select {
+  padding: 0.75rem;
+  font-size: 1rem;
+  min-height: 48px;
+  border-radius: 0.5rem;
+}
+
 .search-box i {
   z-index: 5;
 }
 
-/* Pagination */
-.pagination .page-link {
+.results-count {
+  font-size: 0.85rem;
+}
+
+/* Stars - Mobile */
+.star-icon {
+  font-size: 0.8rem;
+}
+
+/* Pagination - Mobile */
+.pagination {
+  font-size: 0.9rem;
+}
+
+.page-link {
+  padding: 0.5rem 0.75rem;
+  min-height: 44px;
   color: var(--eco-primary);
   border-color: var(--eco-secondary);
 }
@@ -652,43 +762,91 @@ export default {
   color: var(--eco-dark);
 }
 
-/* Stars rating */
-.stars i {
-  font-size: 0.9rem;
-}
-
-/* Price styling */
-.current-price {
-  font-size: 1.25rem;
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
+/* Tablet Styles (768px+) */
+@media (min-width: 768px) {
+  .page-title {
+    font-size: 2.5rem;
+  }
+  
+  .page-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .product-image {
+    height: 220px;
+  }
+  
+  .card-title {
+    font-size: 1.1rem;
+  }
+  
+  .product-description {
+    font-size: 0.9rem;
+    -webkit-line-clamp: 3;
+  }
+  
+  .current-price {
+    font-size: 1.25rem;
+  }
+  
+  .product-meta {
+    font-size: 0.85rem;
+  }
+  
   .filters-sidebar {
-    position: static !important;
-    margin-bottom: 2rem;
+    padding: 1.5rem;
+    position: sticky !important;
+    top: 100px;
   }
   
   .product-overlay {
-    opacity: 1;
+    opacity: 0;
   }
   
-  .products-controls .row > div {
-    margin-bottom: 1rem;
+  .product-card:hover .product-overlay {
+    opacity: 1;
   }
 }
 
-/* Badge styles */
-.badge {
-  font-size: 0.75rem;
+/* Desktop Styles (1024px+) */
+@media (min-width: 1024px) {
+  .product-image {
+    height: 250px;
+  }
+  
+  .card-title {
+    font-size: 1.25rem;
+  }
+  
+  .product-description {
+    font-size: 1rem;
+  }
 }
 
-/* Loading and transitions */
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s ease;
+/* Touch Optimization */
+@media (hover: none) and (pointer: coarse) {
+  .form-check-input,
+  .form-select,
+  .form-control,
+  .btn {
+    min-height: 44px;
+  }
+  
+  .product-card:hover {
+    transform: none;
+  }
+  
+  .product-card:hover .product-image img {
+    transform: none;
+  }
 }
 
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
+/* Focus states for accessibility */
+.btn:focus,
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.2rem rgba(45, 80, 22, 0.25);
+  border-color: var(--eco-primary);
 }
 </style>
