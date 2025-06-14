@@ -27,7 +27,7 @@
           </div>
           <div class="col-lg-6 col-md-4 d-none d-md-block">
             <div class="hero-image text-center">
-              <img src="/src/assets/images/hero-outdoor.jpg" alt="Sustainable Outdoor Adventure" class="img-fluid rounded-3 shadow-lg">
+              <img src="/public/images/hero-outdoor.jpg" alt="Sustainable Outdoor Adventure" class="img-fluid rounded-3 shadow-lg">
             </div>
           </div>
         </div>
@@ -222,21 +222,21 @@ export default {
           name: 'EcoTent Pro 4',
           description: 'Premium 4-person tent made from recycled materials',
           price: 1409.95,
-          image: '/src/assets/images/eco-tent.jpg'
+          image: '/public/images/eco-tent.jpg'
         },
         {
           id: 2,
           name: 'Solar Backpack 35L',
           description: 'Hiking backpack with integrated solar charging panel',
           price: 892.95,
-          image: '/src/assets/images/solar-backpack.jpg'
+          image: '/public/images/solar-backpack.jpg'
         },
         {
           id: 3,
           name: 'Bamboo Water Bottle',
           description: 'Insulated water bottle made from sustainable bamboo',
           price: 164.45,
-          image: '/src/assets/images/bamboo-bottle.jpg'
+          image: '/public/images/bamboo-bottle.jpg'
         }
       ],
       // Testimonials - demonstrates arrays
@@ -247,7 +247,7 @@ export default {
           location: 'Colorado, USA',
           rating: 5,
           review: 'Amazing quality gear that actually helps the environment. My EcoTent has survived multiple camping trips!',
-          avatar: '/src/assets/images/sarah-johnson.jpg'
+          avatar: '/public/images/sarah-johnson.jpg'
         },
         {
           id: 2,
@@ -255,7 +255,7 @@ export default {
           location: 'British Columbia, Canada',
           rating: 5,
           review: 'The solar backpack is a game-changer for long hiking trips. Never worried about phone battery again.',
-          avatar: '/src/assets/images/mike-chen.jpg'
+          avatar: '/public/images/mike-chen.jpg'
         },
         {
           id: 3,
@@ -263,7 +263,7 @@ export default {
           location: 'California, USA',
           rating: 5,
           review: 'Love supporting a company that cares about sustainability. Great products, great mission!',
-          avatar: '/src/assets/images/emma-rodriguez.jpg'
+          avatar: '/public/images/emma-rodriguez.jpg'
         }
       ]
     }
