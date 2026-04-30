@@ -1,35 +1,28 @@
-# ecogear-marketplace
+# EcoGear Marketplace 🌿
 
-This template should help get you started developing with Vue 3 in Vite.
+A full-stack e-commerce marketplace application built with Vue 3 and PHP backend, focused on sustainable outdoor gear products.
 
-## Recommended IDE Setup
+## 🚀 Features
+- Browse and search eco-friendly products
+- Shopping cart and order management
+- Responsive UI with modern design
+- RESTful API backend integration
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## 🛠️ Tech Stack
+- **Frontend:** Vue 3, Vite, JavaScript, CSS
+- **Backend:** PHP
+- **Tools:** ESLint, Prettier, Git, VS Code
 
-## Customize configuration
+## 🌐 Live Demo
+👉 [ecogear-marketplace.vercel.app](https://ecogear-marketplace.vercel.app)
 
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
+## ⚙️ Installation
+```bash
+git clone https://github.com/GokulK1999/ecogear-marketplace.git
+cd ecogear-marketplace
 npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
 npm run dev
 ```
 
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+## 👨‍💻 Developer
+**Gokul Kalla** — [LinkedIn](https://www.linkedin.com/in/gokul-kalla-995556224/) | [Portfolio](https://gokulkalla.vercel.app/)
